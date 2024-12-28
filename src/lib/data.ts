@@ -1061,3 +1061,199 @@ export const calendarEvents = [
     end: new Date(2024, 7, 16, 14, 45),
   },
 ];
+
+
+const studentServicesData = [
+  {
+    studentId:"1234567890",
+    firstName: "John",  
+    lastName: "Doe",
+    email: "jdoe@me.com",
+    phone: "123-456-7890",
+    address: "123 Main Street, Anytown, USA",
+    cafteria:"cafteria 1",
+    photo:
+    "https://images.pexels.com/photos/842980/pexels-photo-842980.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    
+
+
+
+  }
+]
+
+
+export const studentServices: StudentService[] = [
+  {
+    id: 1,
+    name: "Mekdes Asfaw",
+    photos: [
+      {
+        url:
+          "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        type: "student"
+      },
+      {
+        url:
+          "https://chart.apis.google.com/chart?chs=300x300&cht=qr&chl=https://github.com/mekdes-asfaw&choe=UTF-8",
+        type: "qrCode"
+      }
+    ],
+    isBlacklisted: false,
+    scholarshipStatus: "none", // 'none', 'scholarship'
+    healthStatus: "none", // 'none', 'special'
+    department: "CSE",
+    batch: "2014EC",
+    assignedCafeteria: "Cafeteria 1",
+    studentServices:{
+         isMember:false,
+         position:"food quality assurance ",
+         discription:'the student service who responsible for cafteria related issue'
+    },
+    attendance: [
+      { meal: "Breakfast", date: "2024-11-28", attended: true },
+      { meal: "Lunch", date: "2024-11-28", attended: false },
+      { meal: "Dinner", date: "2024-11-28", attended: true }
+    ] as {
+      meal: "Breakfast" | "Lunch" | "Dinner";
+      date: string;
+      attended: boolean;
+    }[]
+  },
+  {
+    id: 2,
+    name: "Tewodros Kebede",
+    photos: [
+      {
+        url:
+          "https://images.pexels.com/photos/1167356/pexels-photo-1167356.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        type: "student"
+      },
+      {
+        url:
+          "https://chart.apis.google.com/chart?chs=300x300&cht=qr&chl=https://github.com/tewodros-kebede&choe=UTF-8",
+        type: "qrCode"
+      }
+    ],
+    isBlacklisted: false,
+    scholarshipStatus: "scholarship", // Scholarship student
+    healthStatus: "none",
+    department: "CSE",
+    batch: "2015EC",
+    assignedCafeteria: "Cafeteria 1",
+    attendance: [
+      { meal: "Breakfast", date: "2024-11-28", attended: true },
+      { meal: "Lunch", date: "2024-11-28", attended: true },
+      { meal: "Dinner", date: "2024-11-28", attended: false }
+    ] as {
+      meal: "Breakfast" | "Lunch" | "Dinner";
+      date: string;
+      attended: boolean;
+    }[],
+    studentServices:{
+      isMember:true,
+      position:"cafteria manager",
+      discription:'the student service who responsible for managing the cafteria'
+    }
+  },
+  {
+    id: 3,
+    name: "Hanna Girmay",
+    photos: [
+      {
+        url:
+          "https://images.pexels.com/photos/1187765/pexels-photo-1187765.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        type: "student"
+      },
+      {
+        url:
+          "https://chart.apis.google.com/chart?chs=300x300&cht=qr&chl=https://github.com/hanna-girmay&choe=UTF-8",
+        type: "qrCode"
+      }
+    ],
+    isBlacklisted: true, 
+    scholarshipStatus: "none",
+    healthStatus: "special",
+    department: "CSE",
+    batch: "2016EC",
+    assignedCafeteria: "Cafeteria 1",
+    attendance: [
+      { meal: "Breakfast", date: "2024-11-28", attended: false },
+      { meal: "Lunch", date: "2024-11-28", attended: false },
+      { meal: "Dinner", date: "2024-11-28", attended: false }
+    ] as {
+      meal: "Breakfast" | "Lunch" | "Dinner";
+      date: string;
+      attended: boolean;
+    }[],
+    studentServices:{
+      isMember:false,
+      position:"special meal assistant",
+      discription:'the student service who responsible for assisting the students with special meal'
+    }
+  },
+  {
+    id: 4,
+    name: "Solomon Tekle",
+    photos: [
+      {
+        url:
+          "https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        type: "student"
+      },
+      {
+        url:
+          "https://chart.apis.google.com/chart?chs=300x300&cht=qr&chl=https://github.com/solomon-tekle&choe=UTF-8",
+        type: "qrCode"
+      }
+    ],
+    isBlacklisted: false,
+    scholarshipStatus: "none",
+    healthStatus: "none",
+    department: "CSE",
+    batch: "2017EC",
+    assignedCafeteria: "Cafeteria 1",
+    attendance: [
+      { meal: "Breakfast", date: "2024-11-28", attended: true },
+      { meal: "Lunch", date: "2024-11-28", attended: true },
+      { meal: "Dinner", date: "2024-11-28", attended: true }
+    ] as {
+      meal: "Breakfast" | "Lunch" | "Dinner";
+      date: string;
+      attended: boolean;
+    }[],
+    studentServices:{
+      isMember:true,
+      position:"cafteria supervisor",
+      discription:'the student service who responsible for supervising the cafteria'
+    }
+  }
+];
+
+export type StudentService = {
+  id: number;
+  name: string;
+  photos: {
+    url: string;
+    type: "photo1" | "photo2";
+  }[];
+  qrcode:"",
+  isBlacklisted: boolean;
+  scholarshipStatus: "none" | "scholarship";
+  healthStatus: "none" | "special";
+  department: string;
+  batch: string;
+  assignedCafeteria: string;
+  attendance: {
+    meal: "Breakfast" | "Lunch" | "Dinner";
+    date: string;
+    attended: boolean;
+  }[];
+  studentServices:{
+    isMember:boolean;
+    position:string;
+    discription:string
+  }
+}
+
+
+

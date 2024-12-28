@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model Student {
+  id            String   @id @default(cuid()) @map("_id")
+  clerkId       String
+  studentId     String  @unique
+  firstName     String   
+  lastName      String  
+  role          Role 
+  email         String   @unique 
+  photo1        String
+  photo2        String
+  photo1Id      String
+  photo2Id      String
+  qrCode        String?
+  isBlackListed Boolean?
+  scholarishipStatus String?
+  healthStatus   String?
+  department     String
+  batch          String
+  assignedCafeteria String
+  attendance     Attendance []
+  studentServicesMembership  StudentServicesMembership[]
+  phoneNumber   String?  
+  dateOfBirth   DateTime
+  gender        Gender   
+
+  address       String?  
+  createdAt     DateTime @default(now()) 
+  updatedAt     DateTime @updatedAt 
+}
+
+model StudentService{
+  id String @id  @default(cuid()) @map("_id")
+  firstName String 
+  lastName  String
+  role Role
+  phoneNumber   String?  
+  dateOfBirth   DateTime
+  gender        Gender  
+  photo         String?
+  address       String?
+  department    String
+  username      String
+  email         String
+
+}
+
+model Attendance {
+  id String  @id @default(cuid()) @map("_id")
+  studentId  String 
+  studentName String
+  studentPicture String
+  cafeteria   String
+  mealType   String
+  timestamp  DateTime @default(now())
+  attended   Boolean
+  mealCost   String
+  student    Student @relation(fields: [studentId], references: [id])
+  checkInMethod Method
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum  Method {
+  fr
+  qrCode
+}
+enum Gender {
+  male 
+  female
+}
+
+enum Role {
+  student 
+  studentService
+  ticketHolder
+  admin
+}
+
+
+
+model StudentServicesMembership {
+  id  String @id @default(cuid()) @map("_id")
+  studentId String
+  isMember  String
+  position  String
+  description String
+  student    Student @relation(fields: [studentId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+}

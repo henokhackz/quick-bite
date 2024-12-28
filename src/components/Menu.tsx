@@ -1,90 +1,89 @@
+import Image from "next/image";
+import Link from "next/link";
+
 const menuItems = [
   {
     title: "MENU",
     items: [
       {
-        icon: "/home.png",
-        label: "Home",
+        label: "Dashboard",
+        icon: () => (
+          <img src="/home.png" alt="Home Icon" className="w-5 h-5 mr-2" />
+        ),
         href: "/",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "student", "ticketHolder", "studentService"],
       },
       {
-        icon: "/teacher.png",
-        label: "Teachers",
-        href: "/list/teachers",
-        visible: ["admin", "teacher"],
+        label: "Attendance",
+        icon: () => (
+          <img
+            src="/attendance.png"
+            alt="Attendance Icon"
+            className="w-5 h-5 mr-2"
+          />
+        ),
+        href: "/list/attendances",
+        visible: ["admin", "student"],
       },
       {
-        icon: "/student.png",
-        label: "Students",
-        href: "/list/students",
-        visible: ["admin", "teacher"],
+        label: "Meal Costs",
+        icon: () => (
+          <img
+            src="/finance.png"
+            alt="Meal Costs Icon"
+            className="w-5 h-5 mr-2"
+          />
+        ),
+        href: "/list/meal-costs",
+        visible: ["admin", "student"],
       },
       {
-        icon: "/parent.png",
-        label: "Parents",
-        href: "/list/parents",
-        visible: ["admin", "teacher"],
+        label: "Feedback",
+        icon: () => (
+          <img
+            src="/message.png"
+            alt="Feedback Icon"
+            className="w-5 h-5 mr-2"
+          />
+        ),
+        href: "/list/feedbacks",
+        visible: ["admin", "students", "studentService"],
       },
       {
-        icon: "/subject.png",
-        label: "Subjects",
-        href: "/list/subjects",
+        label: "Ticket Holders",
+        icon: () => (
+          <img
+            src="/ticket-holders.png"
+            alt="Feedback Icon"
+            className="w-5 h-5 mr-2"
+          />
+        ),
+        href: "/list/ticket-holders",
         visible: ["admin"],
       },
       {
-        icon: "/class.png",
-        label: "Classes",
-        href: "/list/classes",
-        visible: ["admin", "teacher"],
+        label: "Student Service",
+        icon: () => (
+          <img
+            src="/student-service.png"
+            alt="Feedback Icon"
+            className="w-5 h-5 mr-2"
+          />
+        ),
+        href: "/list/student-services",
+        visible: ["admin"],
       },
       {
-        icon: "/lesson.png",
-        label: "Lessons",
-        href: "/list/lessons",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/exam.png",
-        label: "Exams",
-        href: "/list/exams",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/assignment.png",
-        label: "Assignments",
-        href: "/list/assignments",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/result.png",
-        label: "Results",
-        href: "/list/results",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/attendance.png",
-        label: "Attendance",
-        href: "/list/attendance",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/calendar.png",
-        label: "Events",
-        href: "/list/events",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/message.png",
-        label: "Messages",
-        href: "/list/messages",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/announcement.png",
-        label: "Announcements",
-        href: "/list/announcements",
-        visible: ["admin", "teacher", "student", "parent"],
+        label: "Students",
+        icon: () => (
+          <img
+            src="/student.png"
+            alt="Student Management Icon"
+            className="w-5 h-5 mr-2"
+          />
+        ),
+        href: "/list/students",
+        visible: ["admin"],
       },
     ],
   },
@@ -92,23 +91,79 @@ const menuItems = [
     title: "OTHER",
     items: [
       {
-        icon: "/profile.png",
         label: "Profile",
+        icon: () => (
+          <img src="/profile.png" alt="Profile Icon" className="w-5 h-5 mr-2" />
+        ),
         href: "/profile",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
-        icon: "/setting.png",
         label: "Settings",
+        icon: () => (
+          <img
+            src="/setting.png"
+            alt="Settings Icon"
+            className="w-5 h-5 mr-2"
+          />
+        ),
         href: "/settings",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
-        icon: "/logout.png",
         label: "Logout",
+        icon: () => (
+          <img src="/logout.png" alt="Logout Icon" className="w-5 h-5 mr-2" />
+        ),
         href: "/logout",
         visible: ["admin", "teacher", "student", "parent"],
       },
     ],
   },
 ];
+
+export default function Menu() {
+  const role = "admin";
+
+  return (
+    <div className="w-full bg-white min-h-screen p-2 shodow-md gap-4 flex flex-col items-center h-full  max-h-screen overflow-y-scroll top-0 left-0 sticky">
+      {/* Logo */}
+      <Image
+        src="/logo.jpeg"
+        alt="Logo"
+        className="w-15 h-15 mb-4"
+        height={40}
+        width={40}
+      />
+
+      {menuItems.map((category, categoryIndex) => (
+        <div key={categoryIndex} className="mb-4 w-full space-y-4">
+          {/* Category Title */}
+          <h2 className="text-xs font-semibold text-gray-500 mb-4 mt-4">
+            {category.title}
+          </h2>
+
+          {/* Items in Category */}
+          {category.items.map(
+            (item, itemIndex) =>
+              item.visible.includes(role) && (
+                <Link
+                  key={itemIndex}
+                  href={item.href}
+                  className="flex items-center py-2 px-4 rounded-md hover:bg-gray-200"
+                >
+                  {/* Icon */}
+                  {item.icon()}
+
+                  {/* Label */}
+                  <span className="hidden md:block xl:hidden text-dashboardForeground text-sm">
+                    {item.label}
+                  </span>
+                </Link>
+              )
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}

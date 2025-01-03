@@ -1,0 +1,129 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { useState } from "react";
+import { ErrorMessage } from "../ui/error-message";
+import { SubmitButton } from "../ui/submit-button";
+
+// Define the Zod schema for validation
+const loginSchema = z.object({
+  username: z
+    .string()
+    .min(1, "Username is required")
+    .nonempty("Username is required"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(32, "Password must be less than 32 characters"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+const SignInForm = () => {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      setLoading(true);
+      const res = await signIn("credentials", {
+        username: data.username,
+        password: data.password,
+        redirect: false,
+      });
+      console.log(res, "res");
+      if (res?.error || !res?.ok) {
+        setError("Invalid username or password");
+      }
+
+      //  role-based routing after login
+      if (session && res?.ok && session.user) {
+        console.log(session, "session");
+        const role = session?.user.role;
+        console.log(role);
+        if (role) {
+          setError(null);
+          router.push(`/${role.toLowerCase()}`);
+        }
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="h-full  items-center justify-center bg-cardBackground text-cardForeground p-12 rounded-md  flex flex-col gap-4">
+      <div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="  flex flex-col gap-4"
+        >
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Image
+              src="/logo.jpeg"
+              alt="logo"
+              width={24}
+              height={24}
+              className="object-cover"
+            />
+            Cafe Management System
+          </h1>
+          <h2 className="text-gray-400">Sign in to your account</h2>
+          {error && <ErrorMessage message={error} />}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="username" className="text-xs text-gray-500">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              {...register("username")}
+              className={`p-2 rounded-md ring-1 ring-gray-300 ${
+                errors.username ? "ring-red-400" : ""
+              }`}
+            />
+            {errors.username && (
+              <p className="text-xs text-red-400">{errors.username.message}</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="password" className="text-xs text-gray-500">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              {...register("password")}
+              className={`p-2 rounded-md ring-1 ring-gray-300 ${
+                errors.password ? "ring-red-400" : ""
+              }`}
+            />
+            {errors.password && (
+              <p className="text-xs text-red-400">{errors.password.message}</p>
+            )}
+          </div>
+          <SubmitButton isLoading={loading} text="Sign In" />
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default SignInForm;

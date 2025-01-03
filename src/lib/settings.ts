@@ -1,4 +1,4 @@
-export const ITEM_PER_PAGE = 10
+export const ITEM_PER_PAGE = 10;
 
 type RouteAccessMap = {
   [key: string]: string[];
@@ -7,12 +7,20 @@ type RouteAccessMap = {
 export const routeAccessMap: RouteAccessMap = {
   "/admin(.*)": ["admin"],
   "/student(.*)": ["student"],
-  "/list/meal-costs(.*)": ["admin", "studentService", "ticketHolder", "student"],
-  "/student-service(.*)": ["studentService"],
+  "/list/meal-costs(.*)": [
+    "admin",
+    "studentService",
+    "ticketHolder",
+    "student",
+  ],
+  "/student-service(.*)": ["studentService", "admin"],
   "/ticket-holder(.*)": ["ticketHolder"],
+  "/list/ticket-holders": ["admin"],
   "/list/student-services": ["admin"],
-  "/list/students": ["admin", "studentService", "ticketHolder"],
-  "/list/attendance": ["admin", "studentService", "ticketHolder"],
-  "/list/feedback": ["admin", "studentSerivice"],
+  "/list/students": ["studentService", "ticketHolder", "admin"],
+  "/list/attendances": ["admin", "studentService", "ticketHolder"],
+  "/list/feedback": ["admin", "studentService"],
   "/list/announcements": ["admin", "studentService", "ticketHolder", "student"],
 };
+
+export const authRoutes = ["sign-in"];

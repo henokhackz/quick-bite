@@ -1,32 +1,17 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import InputField from "../Input-field";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { ticketHolderSchema } from "@/lib/schema/schema";
+import { createTicketHolder } from "@/lib/actions/admin.action";
+import { convertToBase64 } from "@/lib/utils";
 import Image from "next/image";
-
-const schema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "Username must be at least 3 characters long!" })
-    .max(20, { message: "Username must be at most 20 characters long!" }),
-  email: z.string().email({ message: "Invalid email address!" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters long!" }),
-  firstName: z.string().min(1, { message: "First name is required!" }),
-  lastName: z.string().min(1, { message: "Last name is required!" }),
-  phone: z.string().min(1, { message: "Phone is required!" }),
-  address: z.string().min(1, { message: "Address is required!" }),
-  cafteria: z.string().min(1, { message: "Cafteria Type is required!" }),
-  birthday: z.date({ message: "Birthday is required!" }),
-  sex: z.enum(["male", "female"], { message: "Sex is required!" }),
-  img: z.instanceof(File, { message: "Image is required" }),
-});
-
-type Inputs = z.infer<typeof schema>;
+type Inputs = z.infer<typeof ticketHolderSchema>;
 
 const TicketHolderForm = ({
   type,
@@ -38,18 +23,39 @@ const TicketHolderForm = ({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(ticketHolderSchema),
+    defaultValues: data,
   });
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<File | null>(null);
+  const router = useRouter();
+
+  const onSubmit = async (formData: Inputs) => {
+    try {
+      setIsLoading(true);
+      const result = await createTicketHolder({ data: formData });
+      if (result?.success) {
+        toast.success("ticker created successfully");
+        router.push("/list/ticket-holder");
+      } else {
+        toast.error(result?.message || "Failed to create ticker.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while a  ticker.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-xl font-semibold">Create a new ticket holder</h1>
+      {}
       <span className="text-xs text-gray-400 font-medium">
         Authentication Information
       </span>
@@ -96,11 +102,18 @@ const TicketHolderForm = ({
           error={errors.lastName}
         />
         <InputField
-          label="Phone"
-          name="phone"
-          defaultValue={data?.phone}
+          label="Department"
+          name="department"
+          defaultValue={data?.department}
           register={register}
-          error={errors.phone}
+          error={errors.department}
+        />
+        <InputField
+          label="Phone Number"
+          name="phoneNumber"
+          defaultValue={data?.phoneNumber}
+          register={register}
+          error={errors.phoneNumber}
         />
         <InputField
           label="Address"
@@ -110,11 +123,11 @@ const TicketHolderForm = ({
           error={errors.address}
         />
         <InputField
-          label="Cafteria Type"
-          name="cafteria"
-          defaultValue={data?.cafteria}
+          label="Assigned Cafeteria"
+          name="assignedCafeteria"
+          defaultValue={data?.assignedCafeteria}
           register={register}
-          error={errors.cafteria}
+          error={errors.assignedCafeteria}
         />
         <InputField
           label="Birthday"
@@ -135,33 +148,68 @@ const TicketHolderForm = ({
             <option value="female">Female</option>
           </select>
           {errors.sex?.message && (
-            <p className="text-xs text-red-400">
-              {errors.sex.message.toString()}
-            </p>
+            <p className="text-xs text-red-400">{errors.sex.message}</p>
           )}
         </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center">
-          <label
-            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-            htmlFor="img"
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Role</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("role")}
+            defaultValue={data?.role}
           >
-            <Image src="/upload.png" alt="" width={28} height={28} />
-            <span>Upload a photo</span>
+            <option value="studentService">student service</option>
+            <option value="student">student</option>
+            <option value="ticketHolder">ticket holder</option>
+          </select>
+          {errors.role?.message && (
+            <p className="text-xs text-red-400">{errors.role.message}</p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label
+            htmlFor="photo"
+            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
+          >
+            <span>Upload Photo</span>
           </label>
-          <input type="file" id="img" {...register("img")} className="hidden" />
-          {errors.img?.message && (
-            <p className="text-xs text-red-400">
-              {errors.img.message.toString()}
-            </p>
+          <input
+            type="file"
+            id="photo"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setPhotoPreview(file);
+                const base64 = await convertToBase64(file);
+                setValue("photo", base64);
+              }
+            }}
+          />
+          {errors.photo?.message && (
+            <p className="text-xs text-red-400">{errors.photo.message}</p>
+          )}
+          {photoPreview && (
+            <Image
+              src={photoPreview ? URL.createObjectURL(photoPreview) : ""}
+              alt="student service preview"
+              width={100}
+              height={100}
+              className="rounded-2xl h-50 w-50 object-cover"
+            />
           )}
         </div>
       </div>
-      <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+      <button
+        type="submit"
+        className="bg-primary hover:bg-primary/80 text-white p-2 rounded-md"
+        disabled={isLoading}
+      >
+        {isLoading ? "Submitting..." : type === "create" ? "Create" : "Update"}
       </button>
     </form>
   );
 };
 
 export default TicketHolderForm;
-

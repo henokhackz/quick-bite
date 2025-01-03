@@ -1,14 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import InputField from "../Input-field";
-import Image from "next/image";
-import { useState } from "react";
 import { studentSchema } from "@/lib/schema/schema";
 import { createStudent } from "@/lib/actions/admin.action";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 type Inputs = z.infer<typeof studentSchema>;
@@ -30,25 +31,16 @@ const StudentForm = ({
     defaultValues: data,
   });
 
-  const [img1Name, setImg1Name] = useState("Upload First Photo");
-  const [img2Name, setImg2Name] = useState("Upload Second Photo");
+  const [img1Preview, setImg1Preview] = useState<File | null>(null);
+  const [img2Preview, setImg2Preview] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const onSubmit = async (formData: Inputs) => {
-    setIsLoading(true);
-    const img1Base64 = await convertToBase64(formData.img1);
-    const img2Base64 = await convertToBase64(formData.img2);
-    console.log(formData, "form");
-    const validData = {
-      ...formData,
-      img1: img1Base64,
-      img2: img2Base64,
-    };
-
     try {
-      const result = await createStudent({ data: validData });
+      setIsLoading(true);
+      const result = await createStudent({ data: formData });
       if (!result.success && result.message) {
         setError(result.message);
       }
@@ -178,17 +170,26 @@ const StudentForm = ({
             className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
           >
             <Image src="/upload.png" alt="Upload" width={28} height={28} />
-            <span>{img1Name}</span>
+            {img1Preview && (
+              <Image
+                src={URL.createObjectURL(img1Preview)}
+                alt="student image"
+                width={100}
+                height={100}
+                className="rounded-2xl h-50 w-50 object-fit"
+              />
+            )}
           </label>
           <input
             type="file"
             id="img1"
             className="hidden"
-            onChange={(e) => {
+            onChange={async (e) => {
               const file = e.target.files?.[0];
               if (file) {
-                setValue("img1", file);
-                setImg1Name(file.name);
+                setValue("img1", await convertToBase64(file));
+
+                setImg1Preview(file);
               }
             }}
           />
@@ -197,23 +198,31 @@ const StudentForm = ({
           )}
         </div>
         {/* File Input for Image 2 */}
-        <div className="flex flex-col gap-4 w-full md:w-1/4 ">
+        <div className="flex  gap-4 w-full md:w-1/4 ">
           <label
             htmlFor="img2"
             className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
           >
             <Image src="/upload.png" alt="Upload" width={28} height={28} />
-            <span>{img2Name}</span>
           </label>
+          {img2Preview && (
+            <Image
+              src={URL.createObjectURL(img2Preview)}
+              alt="student image"
+              width={100}
+              height={100}
+              className="rounded-2xl h-50 w-50 object-fit"
+            />
+          )}
           <input
             type="file"
             id="img2"
             className="hidden"
-            onChange={(e) => {
+            onChange={async (e) => {
               const file = e.target.files?.[0];
               if (file) {
-                setValue("img2", file);
-                setImg2Name(file.name);
+                setValue("img2", await convertToBase64(file));
+                setImg2Preview(file);
               }
             }}
           />

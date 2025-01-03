@@ -1,7 +1,7 @@
 import React from "react";
 import SearchBar from "./search-bar";
 import Image from "next/image";
-import { UserButton, UserProfile } from "@clerk/nextjs";
+import UserButton from "./shared/user-button";
 
 const Navbar = () => {
   return (
@@ -30,15 +30,8 @@ const Navbar = () => {
             34
           </span>
         </div>
-        <UserButton
-          appearance={{
-            elements: {
-              footer: {
-                display: "none",
-              },
-            },
-          }}
-        />
+
+        <UserButton />
       </div>
     </div>
   );

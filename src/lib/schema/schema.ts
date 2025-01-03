@@ -21,8 +21,8 @@ export const studentSchema = z.object({
   assignedCafeteria: z
     .string()
     .min(1, { message: "Cafteria Type is required!" }),
-  img1: z.instanceof(File, { message: "image 1 is required" }),
-  img2: z.instanceof(File, { message: "image 1 is required" }),
+  img1: z.string({ message: "image 1 is required" }),
+  img2: z.string({ message: "image 2 is required" }),
 });
 
 export type studentFormSchema = z.infer<typeof studentSchema>;
@@ -35,15 +35,54 @@ export const studentServiceSchema = z.object({
   email: z.string().email({ message: "Invalid email address!" }),
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters long!" }),
+    .min(5, { message: "Password must be at least 5 characters long!" }),
   firstName: z.string().min(1, { message: "First name is required!" }),
   lastName: z.string().min(1, { message: "Last name is required!" }),
   department: z.string().min(1, { message: "Last name is required!" }),
   phoneNumber: z.string().min(1, { message: "Phone is required!" }),
   address: z.string().min(1, { message: "Address is required!" }),
-  birthday: z.date({ message: "Birthday is required!" }),
+  birthday: z.string({ message: "Birthday is required!" }),
   sex: z.enum(["male", "female"], { message: "Sex is required!" }),
+  role: z.enum(["student", "studentService", "ticketHolder"], {
+    message: "role is required!",
+  }),
   photo: z.string({ message: "Image is required!" }),
 });
 
 export type StudentService = z.infer<typeof studentServiceSchema>;
+
+export const ticketHolderSchema = z.object({
+  username: z
+    .string()
+    .min(3, { message: "Username must be at least 3 characters long!" })
+    .max(20, { message: "Username must be at most 20 characters long!" }),
+  email: z.string().email({ message: "Invalid email address!" }),
+  password: z
+    .string()
+    .min(5, { message: "Password must be at least 5 characters long!" }),
+  firstName: z.string().min(1, { message: "First name is required!" }),
+  lastName: z.string().min(1, { message: "Last name is required!" }),
+  department: z.string().min(1, { message: "Last name is required!" }),
+  phoneNumber: z.string().min(1, { message: "Phone is required!" }),
+  address: z.string().min(1, { message: "Address is required!" }),
+  birthday: z.string({ message: "Birthday is required!" }),
+  assignedCafeteria: z.string({ message: "Assigned Cafeteria is required!" }),
+  sex: z.enum(["male", "female"], { message: "Sex is required!" }),
+  role: z.enum(["student", "studentService", "ticketHolder"], {
+    message: "role is required!",
+  }),
+  photo: z.string({ message: "Image is required!" }),
+});
+
+export type TicketHolder = z.infer<typeof ticketHolderSchema>;
+
+
+export const signInSchema = z.object({
+  username: z
+    .string({ required_error: "Username is required" })
+    .min(3, "Username must be at least 3 characters long"),
+  password:
+    z.string({ required_error: "Password is required" })
+    .min(8, "Password must be at least 8 characters long")
+    .max(32, "Password must be less than 32 characters long"),
+});

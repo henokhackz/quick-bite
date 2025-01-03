@@ -9,10 +9,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { studentServiceSchema } from "@/lib/schema/schema";
 import { createStudentService } from "@/lib/actions/admin.action";
-
+import { convertToBase64 } from "@/lib/utils";
+import Image from "next/image";
 type Inputs = z.infer<typeof studentServiceSchema>;
 
-const TicketHolderForm = ({
+const StudentServiceForm = ({
   type,
   data,
 }: {
@@ -30,18 +31,14 @@ const TicketHolderForm = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<File | null>(null);
   const router = useRouter();
 
   const onSubmit = async (formData: Inputs) => {
-    const photoBase64 = await convertToBase64(formData.photo);
-    const validData = {
-      ...formData,
-      photo: photoBase64,
-    };
     setIsLoading(true);
 
     try {
-      const result = await createStudentService({ data: validData });
+      const result = await createStudentService({ data: formData });
       if (result?.success) {
         toast.success("Student service created successfully");
         router.push("/list/student-services");
@@ -148,6 +145,21 @@ const TicketHolderForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Role</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("role")}
+            defaultValue={data?.role}
+          >
+            <option value="studentService">student service</option>
+            <option value="student">student</option>
+            <option value="ticketHolder">ticket holder</option>
+          </select>
+          {errors.role?.message && (
+            <p className="text-xs text-red-400">{errors.role.message}</p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label
             htmlFor="photo"
             className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
@@ -162,6 +174,7 @@ const TicketHolderForm = ({
             onChange={async (e) => {
               const file = e.target.files?.[0];
               if (file) {
+                setPhotoPreview(file);
                 const base64 = await convertToBase64(file);
                 setValue("photo", base64);
               }
@@ -169,6 +182,15 @@ const TicketHolderForm = ({
           />
           {errors.photo?.message && (
             <p className="text-xs text-red-400">{errors.photo.message}</p>
+          )}
+          {photoPreview && (
+            <Image
+              src={photoPreview ? URL.createObjectURL(photoPreview) : ""}
+              alt="student service preview"
+              width={100}
+              height={100}
+              className="rounded-2xl h-50 w-50 object-cover"
+            />
           )}
         </div>
       </div>
@@ -183,4 +205,4 @@ const TicketHolderForm = ({
   );
 };
 
-export default TicketHolderForm;
+export default StudentServiceForm;

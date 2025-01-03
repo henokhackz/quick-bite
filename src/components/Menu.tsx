@@ -1,3 +1,4 @@
+import { auth } from "@/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -122,8 +123,10 @@ const menuItems = [
   },
 ];
 
-export default function Menu() {
-  const role = "admin";
+export default async function Menu() {
+  const session = await auth();
+
+  const role = session?.user.role;
 
   return (
     <div className="w-full bg-white min-h-screen p-2 shodow-md gap-4 flex flex-col items-center h-full  max-h-screen overflow-y-scroll top-0 left-0 sticky">
@@ -144,24 +147,25 @@ export default function Menu() {
           </h2>
 
           {/* Items in Category */}
-          {category.items.map(
-            (item, itemIndex) =>
-              item.visible.includes(role) && (
-                <Link
-                  key={itemIndex}
-                  href={item.href}
-                  className="flex items-center py-2 px-4 rounded-md hover:bg-gray-200"
-                >
-                  {/* Icon */}
-                  {item.icon()}
+          {role &&
+            category.items.map(
+              (item, itemIndex) =>
+                item.visible.includes(role) && (
+                  <Link
+                    key={itemIndex}
+                    href={item.href}
+                    className="flex items-center py-2 px-4 rounded-md hover:bg-gray-200"
+                  >
+                    {/* Icon */}
+                    {item.icon()}
 
-                  {/* Label */}
-                  <span className="hidden md:block xl:hidden text-dashboardForeground text-sm">
-                    {item.label}
-                  </span>
-                </Link>
-              )
-          )}
+                    {/* Label */}
+                    <span className="hidden md:block xl:hidden text-dashboardForeground text-sm">
+                      {item.label}
+                    </span>
+                  </Link>
+                )
+            )}
         </div>
       ))}
     </div>

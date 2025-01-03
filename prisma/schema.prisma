@@ -13,95 +13,201 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model Student {
-  id            String   @id @default(cuid()) @map("_id")
-  clerkId       String
-  studentId     String  @unique
-  firstName     String   
-  lastName      String  
-  role          Role 
-  email         String   @unique 
-  photo1        String
-  photo2        String
-  photo1Id      String
-  photo2Id      String
-  qrCode        String?
-  isBlackListed Boolean?
-  scholarishipStatus String?
-  healthStatus   String?
-  department     String
-  batch          String
-  assignedCafeteria String
-  attendance     Attendance []
-  studentServicesMembership  StudentServicesMembership[]
-  phoneNumber   String?  
-  dateOfBirth   DateTime
-  gender        Gender   
-
-  address       String?  
-  createdAt     DateTime @default(now()) 
-  updatedAt     DateTime @updatedAt 
-}
-
-model StudentService{
-  id String @id  @default(cuid()) @map("_id")
-  firstName String 
-  lastName  String
-  role Role
-  phoneNumber   String?  
-  dateOfBirth   DateTime
-  gender        Gender  
-  photo         String?
-  address       String?
-  department    String
-  username      String
-  email         String
-
-}
-
-model Attendance {
-  id String  @id @default(cuid()) @map("_id")
-  studentId  String 
-  studentName String
-  studentPicture String
-  cafeteria   String
-  mealType   String
-  timestamp  DateTime @default(now())
-  attended   Boolean
-  mealCost   String
-  student    Student @relation(fields: [studentId], references: [id])
-  checkInMethod Method
+model StudentServicesMembership {
+  id          String   @id @default(cuid()) @map("_id")
+  studentId   String
+  isMember    String
+  position    String
+  description String
+  student     Student  @relation(fields: [studentId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-enum  Method {
+model User {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String    @unique
+  username       String    @unique
+  emailVerified  DateTime?
+  image          String?
+  role           Role
+  hashedPassword String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  sessions       Session[]
+  accounts       Account[]
+  attendance     Attendance[]
+  Authenticator  Authenticator[]
+  studentId      String?
+  ticketHolder   TicketHolder[]
+  studentService StudentService[]
+  Student        Student[]
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refreshToken      String?
+  accessToken       String?
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String?
+  sessionState      String?
+  oauthTokenSecret  String?
+  oauthToken        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @id @map("_id")
+  userId               String  @db.ObjectId
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, credentialID])
+}
+
+model Photo {
+  id        String   @id @default(cuid()) @map("_id")
+  photoUrl  String
+  photoId   String
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Student {
+  id                        String                      @id @default(cuid()) @map("_id")
+  userId                    String?                     @db.ObjectId
+  studentId                 String                      @unique
+  firstName                 String
+  lastName                  String
+  email                     String                      @unique
+  photos                    Photo[]
+  qrCode                    String?
+  isBlackListed             Boolean?
+  scholarishipStatus        String?
+  healthStatus              String?
+  department                String
+  batch                     String
+  assignedCafeteria         String
+  attendance                Attendance[]
+  studentServicesMembership StudentServicesMembership[]
+  phoneNumber               String?
+  role                      Role
+  dateOfBirth               DateTime
+  gender                    Gender
+  address                   String?
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime
+  user                      User?                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudentService {
+  id          String   @id @default(cuid()) @map("_id")
+  firstName   String
+  lastName    String
+  userId      String?  @db.ObjectId
+  role        Role
+  phoneNumber String?
+  dateOfBirth DateTime
+  gender      Gender
+  photo       String?
+  photoId     String?
+  clerkId     String
+  address     String?
+  department  String
+  username    String
+  email       String
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TicketHolder {
+  id                String   @id @default(cuid()) @map("_id")
+  firstName         String
+  lastName          String
+  userId            String?  @db.ObjectId
+  role              Role
+  phoneNumber       String?
+  birthday          DateTime
+  sex               Gender
+  photo             String?
+  photoId           String?
+  clerkId           String
+  assignedCafeteria String
+  address           String?
+  department        String
+  username          String
+  email             String
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attendance {
+  id             String   @id @default(cuid()) @map("_id")
+  studentId      String
+  studentName    String
+  studentPicture String
+  cafeteria      String
+  mealType       String
+  timestamp      DateTime @default(now())
+  attended       Boolean
+  mealCost       String
+  student        Student  @relation(fields: [studentId], references: [id])
+  checkInMethod  Method
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  User           User?    @relation(fields: [userId], references: [id])
+  userId         String?  @db.ObjectId
+}
+
+enum Method {
   fr
   qrCode
 }
+
 enum Gender {
-  male 
+  male
   female
 }
 
 enum Role {
-  student 
+  student
   studentService
   ticketHolder
   admin
-}
-
-
-
-model StudentServicesMembership {
-  id  String @id @default(cuid()) @map("_id")
-  studentId String
-  isMember  String
-  position  String
-  description String
-  student    Student @relation(fields: [studentId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
 }

@@ -1,3 +1,5 @@
+import NextAuth from "next-auth";
+import { DefaultSession } from "next-auth";
 import { Gender } from "@prisma/client";
 
 export type Student = {
@@ -30,16 +32,6 @@ export type Student = {
 };
 
 /******  1b15deec-20dd-4356-aa5d-e81e6763eb7d  *******/
-
-export type TicketHolder = {
-  id: string;
-  name: string;
-  photo: string;
-  assignedCafteria: string;
-  address: string;
-  phoneNumber: string;
-  role: "TicketHolder";
-};
 
 export type Feedback = {
   id: string;
@@ -92,28 +84,73 @@ export type StudentForm = {
 };
 
 export type StudentService = {
-  firstName: String;
-  lastName: String;
+  firstName: string;
+  lastName: string;
   role: Role;
-  phoneNumber?: String;
-  dateOfBirth: DateTime;
+  phoneNumber?: string;
+  birthday: DateTime;
   gender: Gender;
-  photo?: String;
-  address?: String;
-  department?: String;
+  photo?: string;
+  address?: string;
+  department?: string;
   email?: string;
   username: string;
 };
 export type StudentServiceForm = {
-  firstName: String;
-  lastName: String;
+  firstName: string;
+  lastName: string;
   role: Role;
-  phoneNumber?: String;
-  dateOfBirth: DateTime;
+  phoneNumber?: string;
+  email?: string;
+  birthday: DateTime;
   sex: Gender;
-  photo?: String;
-  address?: String;
-  department?: String;
+  photo?: string;
+  address?: string;
+  department?: string;
   username: string;
   password: string;
 };
+export type TicketHolderForm = {
+  firstName: string;
+  lastName: string;
+  role: Role;
+  phoneNumber?: string;
+  email?: string;
+  birthday: DateTime;
+  sex: Gender;
+  photo?: string;
+  address?: string;
+  department?: string;
+  username: string;
+  password: string;
+  assignedCafeteria: string;
+};
+export type TicketHolder = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: Role;
+  phoneNumber?: string | null;
+  email?: string;
+  birthday: DateTime;
+  sex: Gender;
+  photo?: string | null;
+  address?: string | null;
+  department?: string;
+  username: string;
+  password?: string;
+  assignedCafeteria: string;
+};
+
+// Declare module to extend the default NextAuth types
+declare module "next-auth" {
+  interface Session {
+    user: {
+      role: string;
+    };
+  }
+
+  interface User {
+    role: string;
+  }
+}

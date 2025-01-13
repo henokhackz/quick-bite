@@ -4,15 +4,18 @@ import { Gender } from "@prisma/client";
 
 export type Student = {
   id: string;
-  studentId: string;
+  username: string;
+  userId: string;
   firstName: string;
   lastName: string;
-  clerkId: string;
-
   role: "student";
-  photo1?: string;
-  photo2?: string;
-  qrcode: {};
+  photos: [
+    {
+      photoUrl: string;
+      photoId: string;
+    }
+  ];
+  qrcode?: string;
   isBlacklisted: boolean;
   scholarshipStatus: "none" | "scholarship";
   healthStatus: "none" | "special";
@@ -24,6 +27,11 @@ export type Student = {
     date: string;
     attended: boolean;
   }[];
+  role: "student";
+  dateOfbirth?: Date;
+  gender?: Gender;
+  address?: string;
+  phoneNumber?: string;
   studentServices?: {
     isMember: boolean;
     position: string;
@@ -116,8 +124,8 @@ export type TicketHolderForm = {
   role: Role;
   phoneNumber?: string;
   email?: string;
-  birthday: DateTime;
-  sex: Gender;
+  dateOfBirth: DateTime;
+  gender: Gender;
   photo?: string;
   address?: string;
   department?: string;
@@ -132,11 +140,25 @@ export type TicketHolder = {
   role: Role;
   phoneNumber?: string | null;
   email?: string;
-  birthday: DateTime;
-  sex: Gender;
-  photo?: string | null;
+  dateOfBirth: DateTime;
+  gender: Gender;
+  ticketHolderPhoto?: {}[];
   address?: string | null;
-  department?: string;
+  username: string;
+  password?: string;
+  assignedCafeteria: string;
+};
+export type StudentService = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: Role;
+  phoneNumber?: string | null;
+  email?: string;
+  dateOfBirth: DateTime;
+  gender: Gender;
+  studentServicePhoto?: {}[];
+  address?: string | null;
   username: string;
   password?: string;
   assignedCafeteria: string;
@@ -146,11 +168,11 @@ export type TicketHolder = {
 declare module "next-auth" {
   interface Session {
     user: {
-      role: string;
-    };
+      role: Role;
+    } & DefaultSession["user"];
   }
 
-  interface User {
+  interface DefaultUser {
     role: string;
   }
 }

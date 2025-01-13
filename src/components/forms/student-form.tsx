@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,17 +8,22 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import InputField from "../Input-field";
 import { studentSchema } from "@/lib/schema/schema";
-import { createStudent } from "@/lib/actions/admin.action";
+import { createStudent, updateStudent } from "@/lib/actions/admin.action";
 import { toast } from "react-toastify";
+import { SubmitButton } from "../ui/submit-button";
+import ImageUpload from "../image-upload";
+import { Student } from "types";
 
 type Inputs = z.infer<typeof studentSchema>;
 
 const StudentForm = ({
   type,
   data,
+  setOpen,
 }: {
   type: "create" | "update";
-  data?: Partial<Inputs>;
+  data?: Partial<Student>;
+  setOpen: (open: boolean) => void;
 }) => {
   const {
     register,
@@ -31,39 +35,56 @@ const StudentForm = ({
     defaultValues: data,
   });
 
-  const [img1Preview, setImg1Preview] = useState<File | null>(null);
-  const [img2Preview, setImg2Preview] = useState<File | null>(null);
+  const [photo1Preview, setPhoto1Preview] = useState<File | null | string>(
+    data?.photos[0].photoUrl || null
+  );
+  const [photo2Preview, setPhoto2Preview] = useState<File | null | string>(
+    data?.photos[1].photoUrl || null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const onSubmit = async (formData: Inputs) => {
+    console.log(formData, "form data");
     try {
       setIsLoading(true);
-      const result = await createStudent({ data: formData });
-      if (!result.success && result.message) {
-        setError(result.message);
+      if (type === "update") {
+        const result = await updateStudent({ data: formData });
+        if (!result.success && result.message) {
+          setError(result.message);
+          toast.error(result.message);
+          setIsLoading(false);
+        }
+        if (result.success) {
+          toast.success("Student updated successfully");
+          setIsLoading(false);
+          setOpen(false);
+          router.push("/list/students");
+        }
       }
-      if (result.success) {
-        toast.success("Student created successfully");
-        router.push("/list/students");
+
+      if (type === "create") {
+        const result: any = await createStudent({ data: formData });
+        if (!result.success && result.message) {
+          setError(result.message);
+          toast.error(result.message);
+          setIsLoading(false);
+        }
+        if (result.success) {
+          toast.success("Student created successfully");
+          setOpen(false);
+          setIsLoading(false);
+          router.push("/list/students");
+        }
       }
-      console.log(result, "result");
-      setIsLoading(false);
     } catch (error) {
       console.log(error, "error from form tyring to submit");
       setIsLoading(false);
+      setError("something went wrong please try again");
     }
   };
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
   return (
     <form
       className="flex flex-col gap-8 py-5"
@@ -74,6 +95,35 @@ const StudentForm = ({
       </h1>
       {error && <p className="text-xs text-red-400">{error}</p>}
       <div className="flex flex-wrap gap-12">
+        <div className="w-full">
+          <span className="text-xs text-gray-400 font-medium">
+            Authentication Information
+          </span>
+        </div>
+        <InputField
+          label="username(Student Id)"
+          name="username"
+          register={register}
+          error={errors.username}
+        />{" "}
+        <InputField
+          label="password"
+          name="password"
+          register={register}
+          error={errors.password}
+        />
+        <div className="w-full">
+          {}
+          <span className="text-xs text-gray-400 font-medium">
+            Personal Information
+          </span>
+        </div>
+        <InputField
+          label="Email"
+          name="email"
+          register={register}
+          error={errors.email}
+        />
         <InputField
           label="First Name"
           name="firstName"
@@ -85,24 +135,6 @@ const StudentForm = ({
           name="lastName"
           register={register}
           error={errors.lastName}
-        />
-        <InputField
-          label="Student ID"
-          name="studentId"
-          register={register}
-          error={errors.studentId}
-        />{" "}
-        <InputField
-          label="password"
-          name="password"
-          register={register}
-          error={errors.password}
-        />
-        <InputField
-          label="Email"
-          name="email"
-          register={register}
-          error={errors.email}
         />
         <InputField
           label="address"
@@ -119,15 +151,15 @@ const StudentForm = ({
         <InputField
           label="Birth Day"
           type="date"
-          name="birthday"
+          name="dateOfBirth"
           register={register}
-          error={errors.birthday}
+          error={errors.dateOfBirth}
         />
         <InputField
           label="Scholariship"
-          name="scholariship"
+          name="scholarishipStatus"
           register={register}
-          error={errors.scholariship}
+          error={errors.scholarishipStatus}
         />
         <InputField
           label="Department"
@@ -137,9 +169,9 @@ const StudentForm = ({
         />
         <InputField
           label="Phone Number"
-          name="phone"
+          name="phoneNumber"
           register={register}
-          error={errors.phone}
+          error={errors.phoneNumber}
         />
         <InputField
           label="Assagned Cafteria"
@@ -149,100 +181,42 @@ const StudentForm = ({
         />
         {/* File Input for Image 1 */}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Sex</label>
+          <label className="text-xs text-gray-500">Gender</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sex")}
-            defaultValue={data?.sex}
+            {...register("gender")}
+            defaultValue={data?.gender}
           >
             <option value="male">Male</option>
             <option value="female">Female</option>
           </select>
-          {errors.sex?.message && (
+          {errors.gender?.message && (
             <p className="text-xs text-red-400">
-              {errors.sex.message.toString()}
+              {errors.gender.message.toString()}
             </p>
           )}
         </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label
-            htmlFor="img1"
-            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-          >
-            <Image src="/upload.png" alt="Upload" width={28} height={28} />
-            {img1Preview && (
-              <Image
-                src={URL.createObjectURL(img1Preview)}
-                alt="student image"
-                width={100}
-                height={100}
-                className="rounded-2xl h-50 w-50 object-fit"
-              />
-            )}
-          </label>
-          <input
-            type="file"
-            id="img1"
-            className="hidden"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setValue("img1", await convertToBase64(file));
-
-                setImg1Preview(file);
-              }
-            }}
+        <div className="flex  gap-2 w-full ">
+          <ImageUpload
+            errors={errors}
+            setValue={setValue}
+            photoPreview={photo1Preview}
+            setPhotoPreview={setPhoto1Preview}
+            type="photo1"
           />
-          {errors.img1?.message && (
-            <p className="text-xs text-red-400">{errors.img1.message}</p>
-          )}
-        </div>
-        {/* File Input for Image 2 */}
-        <div className="flex  gap-4 w-full md:w-1/4 ">
-          <label
-            htmlFor="img2"
-            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-          >
-            <Image src="/upload.png" alt="Upload" width={28} height={28} />
-          </label>
-          {img2Preview && (
-            <Image
-              src={URL.createObjectURL(img2Preview)}
-              alt="student image"
-              width={100}
-              height={100}
-              className="rounded-2xl h-50 w-50 object-fit"
-            />
-          )}
-          <input
-            type="file"
-            id="img2"
-            className="hidden"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setValue("img2", await convertToBase64(file));
-                setImg2Preview(file);
-              }
-            }}
+          <ImageUpload
+            errors={errors}
+            setValue={setValue}
+            photoPreview={photo2Preview}
+            setPhotoPreview={setPhoto2Preview}
+            type="photo2"
           />
-          {errors.img2?.message && (
-            <p className="text-xs text-red-400">{errors.img2.message}</p>
-          )}
-          {errors.root && (
-            <p className="text-sm text-red-400">{errors.root.message}</p>
-          )}
         </div>
       </div>
-      <button
-        type="submit"
-        disabled={isLoading}
-        className={`py-2 px-4 bg-primary hover:bg-primary/80 transition-colors duration-300 rounded-md bg-lamaSky text-xs font-semibold text-white ${
-          isLoading && "opacity-50 cursor-not-allowed   "
-        }`}
-      >
-        {isLoading ? "Loading..." : type === "create" ? "Create" : "Update"}
-      </button>
+      <SubmitButton
+        text={type === "create" ? "Create a student" : "Update a student"}
+        isLoading={isLoading}
+      />
     </form>
   );
 };

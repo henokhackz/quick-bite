@@ -126,6 +126,10 @@ const menuItems = [
 export default async function Menu() {
   const session = await auth();
 
+  if (!session && !session?.user) {
+    return null;
+  }
+
   const role = session?.user.role;
 
   return (
@@ -160,7 +164,7 @@ export default async function Menu() {
                     {item.icon()}
 
                     {/* Label */}
-                    <span className="hidden md:block xl:hidden text-dashboardForeground text-sm">
+                    <span className="hidden md:block  text-dashboardForeground text-sm">
                       {item.label}
                     </span>
                   </Link>

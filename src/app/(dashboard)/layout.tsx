@@ -5,10 +5,10 @@ import React from 'react'
 const DashboardLayout = ({children}:{children: React.ReactNode}) => {
   return (
     <div className='min-h-screen flex w-full bg-dashboardBackground  h-full'>
-      <div className='w-[14%] lg:w-[16%] xl:w-[8%]'>
+      <div className='w-[14%] lg:w-[16%] xl:w-[16%]'>
         <Menu/>
       </div>
-      <div className='w-[86%] lg:w-[84%] xl:w-[92%] flex flex-col'>
+      <div className='w-[86%] lg:w-[84%] xl:w-[84%] flex flex-col'>
         <Navbar/>
         {children}
       </div>

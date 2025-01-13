@@ -23,4 +23,14 @@ export const routeAccessMap: RouteAccessMap = {
   "/list/announcements": ["admin", "studentService", "ticketHolder", "student"],
 };
 
+// roleRoutes.js
+export const roleRoutes: {
+  [key in "ticketHolder" | "studentService" | "admin" | "student"]: string;
+} = {
+  ticketHolder: "/ticket-holder",
+  studentService: "/student-service",
+  admin: "/admin",
+  student: "/student",
+};
+
 export const authRoutes = ["sign-in"];

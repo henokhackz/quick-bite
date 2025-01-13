@@ -11,14 +11,17 @@ import { studentServiceSchema } from "@/lib/schema/schema";
 import { createStudentService } from "@/lib/actions/admin.action";
 import { convertToBase64 } from "@/lib/utils";
 import Image from "next/image";
+import { SubmitButton } from "../ui/submit-button";
 type Inputs = z.infer<typeof studentServiceSchema>;
 
 const StudentServiceForm = ({
   type,
   data,
+  setOpen,
 }: {
   type: "create" | "update";
   data?: any;
+  setOpen: (open: boolean) => void | undefined;
 }) => {
   const {
     register,
@@ -32,30 +35,36 @@ const StudentServiceForm = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<File | null>(null);
+
   const router = useRouter();
 
   const onSubmit = async (formData: Inputs) => {
-    setIsLoading(true);
-
+    console.log(formData, "form data");
     try {
+      setIsLoading(true);
       const result = await createStudentService({ data: formData });
       if (result?.success) {
-        toast.success("Student service created successfully");
+        setIsLoading(false);
+        setOpen(false);
+        toast.success("student service created successfully");
         router.push("/list/student-services");
       } else {
-        toast.error(result?.message || "Failed to create student service.");
+        console.log(result.message, "result");
+        toast.error("Failed to create student service .");
       }
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred while creating the service.");
+      toast.error("An error occurred while a student service .");
     } finally {
       setIsLoading(false);
     }
   };
 
+  console.log(errors, "errors");
   return (
     <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-xl font-semibold">Create a new student service</h1>
+
       <span className="text-xs text-gray-400 font-medium">
         Authentication Information
       </span>
@@ -102,13 +111,6 @@ const StudentServiceForm = ({
           error={errors.lastName}
         />
         <InputField
-          label="Department"
-          name="department"
-          defaultValue={data?.department}
-          register={register}
-          error={errors.department}
-        />
-        <InputField
           label="Phone Number"
           name="phoneNumber"
           defaultValue={data?.phoneNumber}
@@ -124,24 +126,32 @@ const StudentServiceForm = ({
         />
         <InputField
           label="Birthday"
-          name="birthday"
-          defaultValue={data?.birthday}
+          name="dateOfBirth"
+          defaultValue={data?.dateOfBirth}
           register={register}
-          error={errors.birthday}
+          error={errors.dateOfBirth}
           type="date"
+        /> 
+        <InputField
+          label="Assigned Cafeteria"
+          name="assignedCafeteria"
+          defaultValue={data?.assignedCafeteria}
+          register={register}
+          error={errors.assignedCafeteria}
+          type="text"
         />
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Sex</label>
+          <label className="text-xs text-gray-500">Gender</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sex")}
-            defaultValue={data?.sex}
+            {...register("gender")}
+            defaultValue={data?.gender}
           >
             <option value="male">Male</option>
             <option value="female">Female</option>
           </select>
-          {errors.sex?.message && (
-            <p className="text-xs text-red-400">{errors.sex.message}</p>
+          {errors.gender?.message && (
+            <p className="text-xs text-red-400">{errors.gender.message}</p>
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
@@ -194,13 +204,7 @@ const StudentServiceForm = ({
           )}
         </div>
       </div>
-      <button
-        type="submit"
-        className="bg-primary hover:bg-primary/80 text-white p-2 rounded-md"
-        disabled={isLoading}
-      >
-        {isLoading ? "Submitting..." : type === "create" ? "Create" : "Update"}
-      </button>
+      <SubmitButton text="create new student service" isLoading={isLoading} />
     </form>
   );
 };

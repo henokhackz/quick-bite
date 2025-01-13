@@ -1,9 +1,9 @@
 import Announcements from "@/components//charts/announcement";
+import FormModal from "@/components/FormModal";
 import AttendanceChart from "@/components/charts/Attendance-chart";
 import { getStudentDetailsById } from "@/lib/actions/admin.action";
-import { Delete, Edit, Trash } from "lucide-react";
+import { auth } from "@/lib/auth";
 import Image from "next/image";
-import Link from "next/link";
 import { Suspense } from "react";
 
 const SingleStudentPage = async ({
@@ -12,11 +12,14 @@ const SingleStudentPage = async ({
   params: { studentId: string };
 }) => {
   let student = null;
+  const id = params.studentId;
   try {
-    student = await getStudentDetailsById(params.studentId);
+    student = await getStudentDetailsById(id);
   } catch (error) {
     console.log(error);
   }
+  const session = await auth();
+  const role = session?.user?.role!;
 
   return (
     <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
@@ -39,10 +42,10 @@ const SingleStudentPage = async ({
           {/* TOP */}
           <div className="flex flex-col lg:flex-row gap-4">
             {/* USER INFO CARD */}
-            <div className="bg-lamaSky py-6 px-4 rounded-md flex-1 flex gap-4">
+            <div className="bg-primary/10 py-6 px-4 rounded-md flex-1 flex gap-4">
               <div className="w-1/3">
                 <Image
-                  src={student?.data?.photo1 as string}
+                  src={student?.data?.photos[0].photoUrl as string}
                   width={144}
                   height={144}
                   alt="student image"
@@ -117,20 +120,16 @@ const SingleStudentPage = async ({
           <div className="bg-white p-4 rounded-md">
             <h1 className="text-xl font-semibold">Actions</h1>
             <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
-              <Link
-                className="p-3 rounded-md bg-primaryLight/10 flex gap-2 items-center"
-                href="/"
-              >
-                <Edit />
-                <span className="text-primary text-sm">Edit</span>
-              </Link>
-              <Link
-                className="p-3 rounded-md bg-primaryLight/10 flex gap-2 items-center"
-                href="/"
-              >
-                <Trash />
-                <span className="text-red-400 text-sm">delete</span>
-              </Link>
+              {role === "admin" && (
+                <>
+                  <FormModal table="student" type="delete" id={id} />
+                  <FormModal
+                    table="student"
+                    type="update"
+                    data={student?.data}
+                  />
+                </>
+              )}
             </div>
           </div>
           <Announcements />

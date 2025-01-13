@@ -11,14 +11,17 @@ import { ticketHolderSchema } from "@/lib/schema/schema";
 import { createTicketHolder } from "@/lib/actions/admin.action";
 import { convertToBase64 } from "@/lib/utils";
 import Image from "next/image";
+import { SubmitButton } from "../ui/submit-button";
 type Inputs = z.infer<typeof ticketHolderSchema>;
 
 const TicketHolderForm = ({
   type,
   data,
+  setOpen,
 }: {
   type: "create" | "update";
   data?: any;
+  setOpen: (open: boolean) => void | undefined;
 }) => {
   const {
     register,
@@ -32,6 +35,7 @@ const TicketHolderForm = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<File | null>(null);
+
   const router = useRouter();
 
   const onSubmit = async (formData: Inputs) => {
@@ -39,8 +43,10 @@ const TicketHolderForm = ({
       setIsLoading(true);
       const result = await createTicketHolder({ data: formData });
       if (result?.success) {
+        setIsLoading(false);
+        setOpen(false);
+        router.push("/list/ticket-holders");
         toast.success("ticker created successfully");
-        router.push("/list/ticket-holder");
       } else {
         toast.error(result?.message || "Failed to create ticker.");
       }
@@ -102,13 +108,6 @@ const TicketHolderForm = ({
           error={errors.lastName}
         />
         <InputField
-          label="Department"
-          name="department"
-          defaultValue={data?.department}
-          register={register}
-          error={errors.department}
-        />
-        <InputField
           label="Phone Number"
           name="phoneNumber"
           defaultValue={data?.phoneNumber}
@@ -131,24 +130,24 @@ const TicketHolderForm = ({
         />
         <InputField
           label="Birthday"
-          name="birthday"
-          defaultValue={data?.birthday}
+          name="dateOfBirth"
+          defaultValue={data?.dateOfBirth}
           register={register}
-          error={errors.birthday}
+          error={errors.dateOfBirth}
           type="date"
         />
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Sex</label>
+          <label className="text-xs text-gray-500">Gender</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sex")}
-            defaultValue={data?.sex}
+            {...register("gender")}
+            defaultValue={data?.gender}
           >
             <option value="male">Male</option>
             <option value="female">Female</option>
           </select>
-          {errors.sex?.message && (
-            <p className="text-xs text-red-400">{errors.sex.message}</p>
+          {errors.gender?.message && (
+            <p className="text-xs text-red-400">{errors.gender.message}</p>
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
@@ -201,13 +200,7 @@ const TicketHolderForm = ({
           )}
         </div>
       </div>
-      <button
-        type="submit"
-        className="bg-primary hover:bg-primary/80 text-white p-2 rounded-md"
-        disabled={isLoading}
-      >
-        {isLoading ? "Submitting..." : type === "create" ? "Create" : "Update"}
-      </button>
+      <SubmitButton text="create new ticket holder" isLoading={isLoading} />
     </form>
   );
 };

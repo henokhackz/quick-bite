@@ -5,19 +5,16 @@ import prisma from "../prisma";
 import { LastTimeCheckIn } from "../utils";
 
 interface DetectedStudent {
+  id: string;
   firstName: string;
   lastName: string;
-  photo1: string;
+  photos: { photoUrl: string; photoId: string }[];
   studentId: string;
 }
 
 export const createAttendance = async (detectedStudent: DetectedStudent) => {
   // Early validation
-  if (
-    !detectedStudent.firstName ||
-    !detectedStudent.lastName ||
-    !detectedStudent.photo1
-  ) {
+  if (!detectedStudent || !detectedStudent.id ) {
     return {
       success: false,
       message: "Invalid student data. Please provide all required fields.",
@@ -25,24 +22,24 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
   }
 
   try {
-    const { firstName, lastName, photo1, studentId } = detectedStudent; // Ensure studentId exists in DetectedStudent
-    const cafeteria = "Cafeteria 1";
-    const mealType = "Breakfast";
+    const { firstName, lastName, photos, studentId } = detectedStudent;
 
-    if (!studentId) {
+    // Ensure a photo exists for attendance record
+    const photo1 = photos?.[0]?.photoUrl || "";
+    if (!photo1) {
       return {
         success: false,
-        message:
-          "Missing student ID. Each student must have a unique identifier.",
+        message: "Student does not have a valid photo for attendance.",
       };
     }
 
+    const cafeteria = "Cafeteria 1"; 
+    const mealType = "Breakfast"; 
+
     // Check if the student has already checked in recently
     const existingAttendance = await prisma.attendance.findFirst({
-      where: { studentId },
-      orderBy: {
-        timestamp: "desc",
-      },
+      where: { studentId:detectedStudent.id},
+      orderBy: { timestamp: "desc" },
       select: { timestamp: true },
     });
 
@@ -53,7 +50,7 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
         return {
           success: false,
           message:
-            "🥳 You have had your fun now, food ninja! 🥷 The cafeteria needs to catch its breath! 😌 Check in again later for round two of deliciousness! 🍽️💥",
+            "🥳 You’ve already checked in recently. Please wait before trying again! 🍽️",
         };
       }
     }
@@ -66,19 +63,20 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
         studentPicture: photo1,
         cafeteria,
         mealType,
-        checkInMethod: "fr",
+        checkInMethod: "fr", // Face recognition
         attended: true,
-        mealCost: "35",
+        mealCost: "35", // Adjust dynamically if needed
       },
     });
 
+    // Revalidate attendance path to reflect updates
     revalidatePath("/list/attendances");
 
     return {
       success: true,
       data: result,
       message:
-        "Here to feed your brain... and your belly. Welcome to the cafeteria! 🧠🍕",
+        "Welcome to the cafeteria! Your attendance has been successfully recorded. 🧠🍕",
     };
   } catch (error) {
     console.error("Error in createAttendance:", error);
@@ -95,7 +93,7 @@ export const getLatestTenAttendance = async () => {
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
     const result = await prisma.attendance.findMany({
-      take: 5,
+      take: 10, // Fetch latest 10 records
       where: {
         timestamp: {
           gte: oneHourAgo,
@@ -113,6 +111,7 @@ export const getLatestTenAttendance = async () => {
         timestamp: true,
       },
     });
+
     return {
       success: true,
       data: result,

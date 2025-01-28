@@ -27,17 +27,32 @@ const StudentListPage = async ({
 
   // Prepare Prisma query filters
   const query: Prisma.StudentWhereInput = {};
+  const orderBy: Prisma.StudentOrderByWithRelationInput = {};
   for (const [key, value] of Object.entries(queryParams)) {
+   
     if (value) {
       switch (key) {
         case "search":
           query.firstName = { contains: value, mode: "insensitive" };
           break;
+        case "sortBy":
+           if (value) {
+          // Default sort order is ascending (asc), if not provided
+          const sortOrder = searchParams["orderBy"] === "desc" ? "desc" : "asc";
+          const sortField = value as keyof Prisma.StudentOrderByWithRelationInput;
+          orderBy[sortField] = sortOrder as "asc" | "desc";
+
+        }
+        break;
         default:
           break;
       }
     }
   }
+
+
+
+
 
   // Authenticate user
   const session = await auth();
@@ -50,7 +65,7 @@ const StudentListPage = async ({
   let studentsData;
 
   try {
-    studentsData = await getAllStudents(currentPage, query);
+    studentsData = await getAllStudents(currentPage, query, orderBy);
   } catch (error) {
     console.error("Error fetching students:", error);
     return (
@@ -120,6 +135,7 @@ const StudentListPage = async ({
                 table="student"
                 type="delete"
                 username={student.username}
+                data={student}
               />
               <FormModal table="student" type="update" data={student} />
             </>

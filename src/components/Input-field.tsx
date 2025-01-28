@@ -7,6 +7,7 @@ type InputFieldProps = {
   name: string;
   defaultValue?: string;
   error?: FieldError;
+  placeHolder?: string;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 };
 
@@ -16,6 +17,7 @@ const InputField = ({
   register,
   name,
   defaultValue,
+  placeHolder,
   error,
   inputProps,
 }: InputFieldProps) => {
@@ -24,8 +26,9 @@ const InputField = ({
       <label className="text-xs text-gray-500">{label}</label>
       <input
         type={type}
+        placeholder={placeHolder}
         {...register(name)}
-        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-xs w-full text-wrap"
         {...inputProps}
         defaultValue={defaultValue}
       />

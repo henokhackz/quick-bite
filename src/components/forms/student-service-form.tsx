@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { studentServiceSchema } from "@/lib/schema/schema";
-import { createStudentService } from "@/lib/actions/admin.action";
+import { createStudentService, updateStudentService } from "@/lib/actions/admin.action";
 import { convertToBase64 } from "@/lib/utils";
 import Image from "next/image";
 import { SubmitButton } from "../ui/submit-button";
@@ -42,16 +42,36 @@ const StudentServiceForm = ({
     console.log(formData, "form data");
     try {
       setIsLoading(true);
-      const result = await createStudentService({ data: formData });
+    switch(type){
+      case "create":
+        const result = await createStudentService({ data: formData });
       if (result?.success) {
         setIsLoading(false);
         setOpen(false);
         toast.success("student service created successfully");
         router.push("/list/student-services");
-      } else {
+    }else {
         console.log(result.message, "result");
         toast.error("Failed to create student service .");
       }
+      break;
+
+      case "update":
+        const updatedResult = await updateStudentService({ data: formData });
+      if (updatedResult?.success) {
+        setIsLoading(false);
+        setOpen(false);
+        toast.success("student service created successfully");
+        router.push("/list/student-services");
+    }else {
+        console.log(updatedResult.message, "result");
+        toast.error("Failed to create student service .");
+      }
+      break;
+      default:
+        break;
+      
+      } 
     } catch (error) {
       console.error(error);
       toast.error("An error occurred while a student service .");
@@ -63,7 +83,7 @@ const StudentServiceForm = ({
   console.log(errors, "errors");
   return (
     <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)}>
-      <h1 className="text-xl font-semibold">Create a new student service</h1>
+      <h1 className="text-xl font-semibold">{ type === "create" ? "Create Student Service" : "Update Student Service" }</h1>
 
       <span className="text-xs text-gray-400 font-medium">
         Authentication Information
@@ -204,7 +224,7 @@ const StudentServiceForm = ({
           )}
         </div>
       </div>
-      <SubmitButton text="create new student service" isLoading={isLoading} />
+      <SubmitButton text={type === "create" ? "Create new student service " : "Update student service"} isLoading={isLoading} />
     </form>
   );
 };

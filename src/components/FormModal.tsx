@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteStudent, deleteTicketHolder } from "@/lib/actions/admin.action";
+import { deleteStudent, deleteStudentService, deleteTicketHolder } from "@/lib/actions/admin.action";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
@@ -25,7 +25,7 @@ const StudentForm = dynamic(() => import("./forms/student-form"), {
 });
 const StudentService = dynamic(() => import("./forms/student-service-form"), {
   loading: () => (
-    <div className=" h-5 w-5 md:h-10 md:w-10 flex items-center justify-center animate-spin text-primary p-2 shadow-md"></div>
+    <div className=" h-5 w-5 md:h-10 md:w-10  animate-spin text-primary p-2 shadow-md"></div>
   ),
 });
 
@@ -33,7 +33,7 @@ const forms: {
   [key: string]: (
     type: "create" | "update",
     data?: any,
-    setOpen?: ((open: boolean) => void) | undefined
+    setOpen?: (open: boolean) => void 
   ) => JSX.Element;
 } = {
   ticketHolder: (type, data, setOpen) => (
@@ -79,33 +79,43 @@ const FormModal = ({
 
   const handleDelete = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!username) return;
+
+    if (!username) {
+      console.log("username is required");
+      return;
+    }
     try {
       setLoading(true);
       let result;
+     
+
       switch (role) {
         case "student":
-          result = await deleteTicketHolder(username);
+          result = await deleteStudent(username);
           break;
         case "ticketHolder":
-          result = await deleteStudent(username);
+          result = await deleteTicketHolder(username);
           break;
         case "studentService":
-          result = await deleteStudent(username);
+          result = await deleteStudentService(username);
           break;
         default:
           break;
       }
       if (!result?.success) {
         setLoading(false);
-        setError(result.message);
-        setOpen(false);
-        toast.error(result.message);
+        if(result){
+          setError(result.message);
+          toast.error(result.message);
+          setOpen(false);
+        }
       }
 
       setLoading(false);
       setOpen(false);
-      toast.success(result.message);
+      if(result){
+        toast.success(result.message);
+      }
     } catch (error) {
       console.log(error, "error");
       setError("something went wrong");

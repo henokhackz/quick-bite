@@ -2,7 +2,6 @@
 import { revalidatePath } from "next/cache";
 
 import cloudinary from "../cloudinary";
-import bcryptjs from "bcryptjs";
 
 import { StudentForm, TicketHolderForm } from "../../../types";
 import prisma from "../prisma";
@@ -11,12 +10,13 @@ import { page, saltAndHashPassword, toISO8601DateTime } from "../utils";
 import {
   studentSchema,
   StudentServiceForm,
+  studentServiceSchema,
   ticketHolderSchema,
 } from "../schema/schema";
-// import { Role } from "@prisma/client";
-// import { ticketHolders } from "../dummy";
+
 import { auth } from "../auth";
-import { TicketHolder } from "../../../types/index";
+import { Prisma } from "@prisma/client";
+
 
 export const deleteImage = async (imageId: string) =>
   await cloudinary.uploader
@@ -183,20 +183,19 @@ export async function updateStudent({ data }: { data: Partial<StudentForm> }) {
   }
 
   try {
-    // Fetch existing student record
+    // Fetch the existing student and related photos
     const existingStudent = await prisma.user.findUnique({
       where: { username },
       include: {
-        Student: true,
+        Student: {
+          include: {
+            photos: true,
+          },
+        },
       },
     });
 
-    const photos = await prisma.student.findUnique({
-      where: { username },
-      select: {
-        photos: true,
-      },
-    });
+    
 
     if (!existingStudent) {
       return {
@@ -205,7 +204,7 @@ export async function updateStudent({ data }: { data: Partial<StudentForm> }) {
       };
     }
 
-    const userId = existingStudent.id;
+    const { photos: existingPhotos } = existingStudent.Student ;
 
     // Upload photos if provided
     const [img1Result, img2Result] = await Promise.all([
@@ -217,15 +216,34 @@ export async function updateStudent({ data }: { data: Partial<StudentForm> }) {
         : null,
     ]);
 
-    // Prepare updated data
-    const isoDate = toISO8601DateTime(dateOfBirth as string);
-    const hashedPassword = password
-      ? await saltAndHashPassword(password)
-      : undefined;
+    // Prepare photo updates dynamically
+    const photoUpdates = [];
+    if (img1Result && existingPhotos[0]?.photoId !== img1Result.public_id) {
+      photoUpdates.push({
+        where: { photoId: existingPhotos[0]?.photoId },
+        data: {
+          photoUrl: img1Result.secure_url,
+          photoId: img1Result.public_id,
+        },
+      });
+    }
+    if (img2Result && existingPhotos[1]?.photoId !== img2Result.public_id) {
+      photoUpdates.push({
+        where: { photoId: existingPhotos[1]?.photoId },
+        data: {
+          photoUrl: img2Result.secure_url,
+          photoId: img2Result.public_id,
+        },
+      });
+    }
 
-    // Update student record
+    // Prepare the data for update
+    const isoDate = dateOfBirth ? toISO8601DateTime(dateOfBirth) : undefined;
+    const hashedPassword = password ? await saltAndHashPassword(password) : undefined;
+
+    // Update the student record
     const updatedStudent = await prisma.user.update({
-      where: { id: userId },
+      where: {username },
       data: {
         name: `${firstName} ${lastName}`,
         email,
@@ -233,46 +251,28 @@ export async function updateStudent({ data }: { data: Partial<StudentForm> }) {
         image: img1Result?.secure_url || existingStudent.image,
         Student: {
           update: {
-            where: {
+            where:{
               username,
             },
-            data: {
+            data:{
               username,
-              firstName,
-              lastName,
-              batch,
-              address,
-              phoneNumber,
-              dateOfBirth: isoDate,
-              gender,
-              assignedCafeteria,
-              department,
-              email,
-              role: "student",
-              scholarishipStatus: scholarishipStatus || "no scholarship",
-              photos: {
-                update: [
-                  {
-                    where: {
-                      photoId: photos?.photos[0]?.photoId,
-                    },
-                    data: {
-                      photoUrl: img1Result?.secure_url || existingStudent.image,
-                      photoId: img1Result?.public_id || existingStudent.image,
-                    },
-                  },
-                  {
-                    where: {
-                      photoId: photos?.photos[1]?.photoId,
-                    },
-                    data: {
-                      photoUrl: img2Result?.secure_url || existingStudent.image,
-                      photoId: img2Result?.public_id || existingStudent.image,
-                    },
-                  },
-                ],
-              },
-            },
+            firstName,
+            lastName,
+            batch,
+            address,
+            phoneNumber,
+            department,
+            role: "student",
+            dateOfBirth: isoDate,
+            gender,
+            assignedCafeteria,
+            email,
+            scholarishipStatus: scholarishipStatus || "no scholarship",
+            photos:{
+              update: photoUpdates,
+            }
+            }
+            
           },
         },
       },
@@ -281,7 +281,7 @@ export async function updateStudent({ data }: { data: Partial<StudentForm> }) {
     // Revalidate cache
     revalidatePath("/list/students");
 
-    return { success: true, data: updatedStudent };
+    return { success: true, data: updatedStudent, };
   } catch (error) {
     console.error("Error while updating student:", error);
     return {
@@ -293,8 +293,8 @@ export async function updateStudent({ data }: { data: Partial<StudentForm> }) {
 
 export const deleteStudent = async (username: string) => {
   console.log(username, "this is student username ");
-  if (id === "" || !id)
-    return { success: false, message: "student id is required" };
+  if (username === "" || !username)
+    return { success: false, message: "student username is required" };
   try {
     const existingStudent = await prisma.student.findUnique({
       where: {
@@ -344,47 +344,20 @@ export const deleteStudent = async (username: string) => {
   }
 };
 
-// export async function getStudentImages() {
-//   try {
-//     const result = await prisma.student.findMany({
-//       select: {
-//         photo1: true,
-//         photo2: true,
-//         id: true,
-//       },
-//     });
-//     return result;
-//   } catch (error) {
-//     console.log(error);
-//     return [];
-//   }
-// }
+export async function getStudentImages() {
+  try {
+    const result = await prisma.student.findMany({
+      select: {
+       photos:true
+      },
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
 
-// export async function getStudentById(id: string) {
-//   try {
-//     const student = await prisma.student.findUnique({
-//       where: {
-//         id,
-//       },
-//       select: {
-//         firstName: true,
-//         lastName: true,
-//         photo1: true,
-//         studentId: true,
-//       },
-//     });
-//     return {
-//       success: true,
-//       data: student,
-//     };
-//   } catch (error) {
-//     console.log(error);
-//     return {
-//       success: false,
-//       message: "Error getting student",
-//     };
-//   }
-// }
 
 export const getStudentDetailsById = async (id: string) => {
   try {
@@ -396,6 +369,7 @@ export const getStudentDetailsById = async (id: string) => {
         photos: true,
       },
     });
+  
     return {
       success: true,
       data: student,
@@ -409,7 +383,9 @@ export const getStudentDetailsById = async (id: string) => {
   }
 };
 
-export const getAllStudents = async (p: number, query: any) => {
+
+
+export const getAllStudents = async (p: number, query:Prisma.StudentWhereInput, orderBy:Prisma.StudentOrderByWithRelationInput ) => {
   const session = await auth();
   if (!session && !session?.user) {
     return {
@@ -426,9 +402,11 @@ export const getAllStudents = async (p: number, query: any) => {
     };
   }
   try {
+    console.log(query, "query", orderBy, 'orderBy');
     const [students, total] = await prisma.$transaction([
       prisma.student.findMany({
         where: query,
+        orderBy:orderBy ,
         skip: (p - 1) * 10,
         take: page,
         include: {
@@ -458,116 +436,7 @@ export const getAllStudents = async (p: number, query: any) => {
     };
   }
 };
-// // get all student service data
-// export const getAllStudentService = async (p: number) => {
-//   try {
-//     const [studentServices, total] = await prisma.$transaction([
-//       prisma.studentService.findMany({
-//         skip: (p - 1) * 10,
-//         take: 10,
-//       }),
-//       prisma.student.count(),
-//     ]);
 
-//     if (!studentServices) {
-//       return {
-//         success: false,
-//         message: "cannot find student service",
-//         data: null,
-//       };
-//     }
-
-//     return {
-//       success: true,
-//       data: studentServices,
-//       total: total,
-//     };
-//   } catch (error) {
-//     console.log(error, "error occured while fetching students data");
-//     return {
-//       success: false,
-//       message: "something went wrong please try again",
-//     };
-//   }
-// };
-
-// // create new student service
-
-// export const createStudentService = async ({
-//   data,
-// }: {
-//   data: StudentServiceForm;
-// }) => {
-//   const validData = studentServiceSchema.safeParse(data);
-
-//   if (!validData.success)
-//     return { success: false, message: `${validData.error.message}` };
-
-//   const { firstName, lastName, username, address, password, photo, email } =
-//     validData.data;
-//   const studentService = validData.data;
-
-//   const [photoResult] = await Promise.all([
-//     cloudinary.uploader.upload(photo, { folder: "student-service" }),
-//   ]);
-
-//   const { secure_url: photoUrl, public_id: photoId } = photoResult;
-
-//   const existingStudents = await clerkClient.users.getUserList({
-//     limit: 10,
-//     query: email,
-//   });
-
-//   const existingStudent = existingStudents.data.find(
-//     (student) => student.username === username
-//   );
-
-//   if (existingStudent) {
-//     return {
-//       success: false,
-//       message: "student already exist ",
-//     };
-//   }
-
-//   const hashedPassword = await bcryptjs.hash(password, 10);
-//   try {
-//     const newUser = await clerkClient.users.createUser({
-//       username,
-//       password: hashedPassword,
-//       firstName,
-//       lastName,
-//     });
-
-//     const isoDate = toISO8601DateTime(studentService.birthday);
-
-//     const newStudentService = await prisma.studentService.create({
-//       data: {
-//         firstName: studentService?.firstName,
-//         lastName: studentService?.lastName,
-//         email: studentService?.email,
-//         username: studentService?.username,
-//         address: studentService?.address,
-//         phoneNumber: studentService?.phoneNumber,
-//         photo: photoUrl,
-//         photoId: photoId,
-//         role: Role.studentService,
-//         department: studentService.department,
-//         dateOfBirth: isoDate,
-//         gender: studentService.sex,
-//         clerkId: newUser.id,
-//       },
-//     });
-//     revalidatePath("/list/student-services");
-//     return {
-//       success: true,
-//       data: newStudentService,
-//       message: "student service created successfully",
-//     };
-//   } catch (error) {
-//     console.log("error occured while creating student service", error);
-//     return { success: false, message: "something went wrong please try again" };
-//   }
-// };
 // create new ticket holder
 export const createTicketHolder = async ({
   data,
@@ -666,14 +535,6 @@ export const createTicketHolder = async ({
 
 // get all ticket holders data
 
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * Retrieves all ticket holders
- * @param p the page number
- * @param query the query to filter the result
- * @returns a promise that resolves to an object with a boolean success property and a data property that contains an array of ticket holders and a total property that contains the total count of ticket holders
- */
-/******  b86f39f2-e51d-4835-bb05-3c5f8a0f59b6  *******/
 export const getAllTicketHolders = async (p: number, query: any) => {
   try {
     const [ticketHolders, total] = await prisma.$transaction([
@@ -762,6 +623,31 @@ export const deleteTicketHolder = async (username: string) => {
   }
 };
 
+export const getTicketHoldlerDetailsById = async (id: string) => {
+  try {
+    const ticketHolder = await prisma.ticketHolder.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        ticketHolderPhoto: true,
+      },
+    });
+    return {
+      success: true,
+      data: ticketHolder,
+    };
+  } catch (error) {
+    console.log("error occured while fetching ticket holder details", error);
+    return {
+      success: false,
+      message: "something went wrong please try again",
+    };
+  }
+
+  
+}
+
 export const createStudentService = async ({
   data,
 }: {
@@ -795,14 +681,19 @@ export const createStudentService = async ({
     const { secure_url: photoUrl, public_id: photoId } = photoResult;
 
     // Check for existing student service by username
-    const existingStudentService = await prisma.user.findUnique({
-      where: { username },
+    const existingStudentService = await prisma.user.findFirst({
+      where: { 
+        OR:[
+          {username},
+          {email}
+        ]
+       },
     });
 
     if (existingStudentService) {
       return {
         success: false,
-        message: "Student service already exists",
+        message: "Student service with this username or email already exists",
       };
     }
 
@@ -908,11 +799,12 @@ export const deleteStudentService = async (username: string) => {
   }
 };
 /******  b86f39f2-e51d-4835-bb05-3c5f8a0f59b6  *******/
-export const getAllStudentService = async (p: number, query: any) => {
+export const getAllStudentService = async (p: number, query:Prisma.StudentServiceWhereInput, orderBy:Prisma.StudentServiceOrderByWithRelationInput) => {
   try {
     const [studentServices, total] = await prisma.$transaction([
       prisma.studentService.findMany({
         where: query,
+        orderBy:orderBy,
         skip: (p - 1) * 10,
         take: 10,
         include: {
@@ -938,6 +830,165 @@ export const getAllStudentService = async (p: number, query: any) => {
     };
   } catch (error) {
     console.log(error, "error occured while fetching student services data");
+    return {
+      success: false,
+      message: "something went wrong please try again",
+    };
+  }
+};
+
+export const updateStudentService = async ({
+  data,
+}: {
+  data: Partial<StudentServiceForm>;
+}) => {
+  try {
+    const validation = studentServiceSchema.safeParse(data);
+
+    if (!validation.success) {
+      return {
+        success: false,
+        message: validation.error.message,
+      };
+    }
+
+    const {
+      firstName,
+      lastName,
+      username,
+      email,
+      address,
+      phoneNumber,
+      dateOfBirth,
+      gender,
+      password,
+      assignedCafeteria,
+     photo
+    } = validation.data;
+
+    const existingStudent = await prisma.user.findUnique({
+      where: { username },
+      include: {
+       studentService:{
+        include: {
+          studentServicePhoto: true,
+        },
+       }
+      },
+    });
+
+    if (!existingStudent) {
+      return {
+        success: false,
+        message: "Student with this username does not exist",
+      };
+    }
+ 
+    let photoUrl ;
+    let photoId ;
+
+    if(photo){
+      const photoResult = await cloudinary.uploader.upload(photo, {
+        folder: "student-service",
+      });
+      const { secure_url, public_id } = photoResult;
+      photoUrl = secure_url;
+      photoId = public_id;
+
+
+    }
+
+
+
+    // Check for existing student service by username
+
+    const { studentServicePhoto: existingPhotos } = existingStudent.studentService;
+    // Prepare photo updates dynamically
+    const photoUpdates: {
+      where: { photoId: string };
+      data: { photoUrl: string; photoId: string };
+    }[] = [];
+
+
+    if (photo && existingPhotos[0]?.photoId !== photo && photoUrl && photoId) {
+      photoUpdates.push({
+        where: { photoId: existingPhotos[0]?.photoId },
+        data: {
+          photoUrl,
+          photoId, 
+        },
+      });
+    }
+
+    let hashedPassword;
+
+   if(password){
+    hashedPassword = await saltAndHashPassword(password) ;
+
+   }
+
+    const updatedStudent = await prisma.user.update({
+      where: { username },
+      data: {
+        name: `${firstName} ${lastName}`,
+        email,
+        hashedPassword,
+        studentService: {
+          update: {
+            where: { username },
+            data: {
+              firstName,
+              lastName,
+              address,
+              phoneNumber,
+              dateOfBirth: dateOfBirth && toISO8601DateTime(dateOfBirth) , 
+              gender,
+              assignedCafeteria,
+              email,
+              studentServicePhoto: {
+                update: photoUpdates,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    revalidatePath('/list/student-services');
+
+    return {
+      success: true,
+      data: updatedStudent,
+      message: 'Student service updated successfully',
+    };
+  } catch (error) {
+    console.error('Error updating student service:', error);
+    return {
+      success: false,
+      message: 'Something went wrong. Please try again.',
+      data: null,
+    };
+  }
+};
+
+
+export const getStudentServiceDetailsById = async (id: string) => {
+  try {
+    const studentService = await prisma.studentService.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        studentServicePhoto: true,
+      },
+    });
+  
+    return {
+      success: true,
+      data: studentService,
+    };
+  } catch (error) {
+    console.log("error occured while fetching student service details", error);
     return {
       success: false,
       message: "something went wrong please try again",

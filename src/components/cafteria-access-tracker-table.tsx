@@ -46,6 +46,8 @@ const CafteriaAccessTrackerTable = ({
   const [isCheckInLoading, setIsCheckInLoading] = useState(false);
   const [isAttendanceLoading, setIsAttendanceLoading] = useState(false);
 
+  console.log(detectedStudent, 'detected student')
+
   const checkInStudent = useCallback(async () => {
     if (!detectedStudent) return;
 

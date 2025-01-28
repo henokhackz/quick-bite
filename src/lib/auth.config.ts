@@ -2,7 +2,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { getUserByUsername } from "./actions/user.action";
 import { signInSchema } from "./schema/schema";
 import { comparePassword } from "./utils";
-import { authRoutes, routeAccessMap } from "./settings";
+import { authRoutes, roleRoutes, routeAccessMap } from "./settings";
 
 const authConfig = {
   providers: [
@@ -59,14 +59,18 @@ const authConfig = {
       for (const { matcher, allowedRoles } of matchers) {
         if (matcher(pathname) && !allowedRoles.includes(role)) {
           const newUrl = new URL(nextUrl);
-          newUrl.pathname = `${role}`;
+          const rolePath = role ? `${roleRoutes[role as keyof typeof roleRoutes]}` : "student";
+          newUrl.pathname = `${rolePath}`;
           return Response.redirect(newUrl);
         }
       }
 
       if (authRoutes.includes(pathname)) {
         if (isLoggedIn) {
-          return Response.redirect(new URL("/", nextUrl));
+          const rolePath = role ? `${roleRoutes[role as keyof typeof roleRoutes]}` : "student";
+          const newUrl = new URL(nextUrl);
+          newUrl.pathname = `${rolePath}`;
+          return Response.redirect(new URL(newUrl, nextUrl));
         }
         return true; // Allow access to auth pages if not logged in
       }

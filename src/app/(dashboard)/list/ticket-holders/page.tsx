@@ -15,10 +15,10 @@ import { useSession } from "next-auth/react";
 const columns = [
   { header: "Info", accessor: "info" },
   { header: "Phone", accessor: "phone", className: "hidden lg:table-cell" },
-  { header: "Address", accessor: "address", className: "hidden lg:table-cell" },
+  { header: "Assigned Cafeteria", accessor: "cafeteria", className: "hidden lg:table-cell" },
   {
-    header: "Assigned Cafeteria",
-    accessor: "cafeteria",
+    header: "Address",
+    accessor: "address",
     className: "hidden lg:table-cell",
   },
   { header: "Actions", accessor: "action" },
@@ -51,8 +51,8 @@ const StudentListPage = ({
 
   const stableQuery = useMemo(() => {
     const query: Record<string, any> = {};
-    if (queryParams.search) {
-      query.firstName = { contains: queryParams?.search, mode: "insensitive" };
+    if (queryParams["search"]) {
+      query["firstName"] = { contains: queryParams?.["search"], mode: "insensitive" };
     }
     return query;
   }, [queryParams]);
@@ -96,7 +96,7 @@ const StudentListPage = ({
       <td className="flex items-center gap-4 p-4">
         {item?.ticketHolderPhoto?.[0] && (
           <Image
-            src={item.ticketHolderPhoto[0].photoUrl}
+            src={  item.ticketHolderPhoto[0]?.photoUrl}
             alt="Ticket Holder"
             width={40}
             height={40}
@@ -109,8 +109,9 @@ const StudentListPage = ({
         </div>
       </td>
       <td className="hidden md:table-cell">{item.phoneNumber}</td>
-      <td className="hidden md:table-cell">{item.address}</td>
       <td className="hidden md:table-cell">{item.assignedCafeteria}</td>
+      <td className="hidden md:table-cell">{item.address}</td>
+      <td className="hidden md:table-cell">{item.gender}</td>
       <td>
         <div className="flex items-center gap-2">
           <Link href={`/list/ticket-holders/${item.id}`}>
@@ -119,7 +120,10 @@ const StudentListPage = ({
             </button>
           </Link>
           {role === "admin" && (
-            <FormModal table="ticketHolder" type="delete" id={item.username} />
+            <>
+            <FormModal table="ticketHolder" type="delete" username={item.username} data={item} />
+            <FormModal table="ticketHolder" type="update" />
+            </>
           )}
         </div>
       </td>
@@ -143,12 +147,13 @@ const StudentListPage = ({
             </button>
             {role === "admin" && (
               <FormModal table="ticketHolder" type="create" />
+              
             )}
           </div>
         </div>
       </div>
       {loading && (
-        <div className="flex w-full items-center justify-center">
+        <div className="flex w-full items-center justify-center h-full">
           <div className="loader"></div>
         </div>
       )}

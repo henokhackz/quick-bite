@@ -158,7 +158,7 @@ model Student {
   attendance                Attendance[]
   studentServicesMembership StudentServicesMembership[]
   phoneNumber               String?
-  role                      Role
+  role                      Role  @default(student)
   dateOfBirth               DateTime
   gender                    Gender
   address                   String?
@@ -195,7 +195,7 @@ model StudentService {
   assignedCafeteria String
   phoneNumber       String?
   role              Role
-  dateOfBirth       DateTime
+  dateOfBirth       DateTime?
   gender            Gender
   address           String?
   user              User?               @relation(fields: [userId], references: [id], onDelete: Cascade)

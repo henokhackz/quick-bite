@@ -20,7 +20,7 @@ const TicketHolderForm = ({
   setOpen,
 }: {
   type: "create" | "update";
-  data?: any;
+  data?: Inputs;
   setOpen: (open: boolean) => void | undefined;
 }) => {
   const {

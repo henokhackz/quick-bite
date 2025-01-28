@@ -92,13 +92,17 @@ export type StudentForm = {
 };
 
 export type StudentService = {
+  id?:string
   firstName: string;
   lastName: string;
   role: Role;
   phoneNumber?: string;
   birthday: DateTime;
   gender: Gender;
-  photo?: string;
+  studentServicePhoto?: {
+    photoUrl:string
+    photoId:string
+  }[];
   address?: string;
   department?: string;
   email?: string;

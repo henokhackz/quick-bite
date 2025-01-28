@@ -5,12 +5,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useState } from "react";
 import { ErrorMessage } from "../ui/error-message";
 import { SubmitButton } from "../ui/submit-button";
 
-// Define the Zod schema for validation
+
 const loginSchema = z.object({
   username: z
     .string()
@@ -26,7 +26,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const SignInForm = () => {
   const router = useRouter();
-  const { data: session } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -41,39 +40,44 @@ const SignInForm = () => {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Sign in the user
       const res = await signIn("credentials", {
         username: data.username,
         password: data.password,
-        redirect: false,
+        redirect: false, 
       });
-      console.log(res, "res");
+
       if (res?.error || !res?.ok) {
         setError("Invalid username or password");
+        return;
       }
 
-      //  role-based routing after login
-      if (session && res?.ok && session.user) {
-        console.log(session, "session");
-        const role = session?.user.role;
-        console.log(role);
+      // Refetch session after successful sign-in
+      const session = await getSession();
+
+      // Handle role-based redirection
+      if (session?.user) {
+        const role = session.user.role;
         if (role) {
-          setError(null);
           router.push(`/${role.toLowerCase()}`);
         }
       }
     } catch (error) {
       console.error("Login failed:", error);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="h-full  items-center justify-center bg-cardBackground text-cardForeground p-12 rounded-md  flex flex-col gap-4">
+    <div className="h-full items-center justify-center bg-cardBackground text-cardForeground p-12 rounded-md flex flex-col gap-4">
       <div>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="  flex flex-col gap-4"
+          className="flex flex-col gap-4"
         >
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Image

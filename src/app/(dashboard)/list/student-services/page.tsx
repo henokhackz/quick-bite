@@ -27,12 +27,22 @@ const StudentServicePage = async ({
 
   // Prepare Prisma query filters
   const query: Prisma.StudentServiceWhereInput = {};
+  const orderBy: Prisma.StudentServiceOrderByWithRelationInput = {};
   for (const [key, value] of Object.entries(queryParams)) {
     if (value) {
       switch (key) {
         case "search":
           query.firstName = { contains: value, mode: "insensitive" };
           break;
+        case "sortBy":
+           if (value) {
+          // Default sort order is ascending (asc), if not provided
+          const sortOrder = searchParams["orderBy"] === "desc" ? "desc" : "asc";
+          const sortField = value as keyof Prisma.StudentServiceOrderByWithRelationInput;
+          orderBy[sortField] = sortOrder as "asc" | "desc";
+
+        }
+        break;
         default:
           break;
       }
@@ -50,7 +60,7 @@ const StudentServicePage = async ({
   let studentServicesData;
 
   try {
-    studentServicesData = await getAllStudentService(currentPage, query);
+    studentServicesData = await getAllStudentService(currentPage, query,orderBy );
   } catch (error) {
     console.error("Error fetching student services:", error);
     return (
@@ -77,6 +87,7 @@ const StudentServicePage = async ({
       </div>
     );
   }
+  
 
   // Render student table rows
   const renderRow = (studentService: Partial<StudentService>) => (
@@ -106,11 +117,10 @@ const StudentServicePage = async ({
       </td>
       {/* Additional Columns */}
       <td className="hidden md:table-cell">{studentService.username}</td>
-      <td className="hidden md:table-cell">{studentService.firstName}</td>
-      <td className="hidden md:table-cell">{studentService?.address}</td>
-      <td className="hidden md:table-cell">
-        {studentService.address?.toLowerCase()}
-      </td>
+      <td className="hidden md:table-cell">{studentService.email}</td>
+      <td className="hidden md:table-cell">{studentService?.phoneNumber}</td>
+      <td className="hidden md:table-cell">{studentService?.department}</td>
+      
       {/* Actions */}
       <td>
         <div className="flex items-center gap-2">
@@ -125,6 +135,7 @@ const StudentServicePage = async ({
                 table="studentService"
                 type="delete"
                 username={studentService?.username}
+                data={studentService}
               />
               <FormModal
                 table="studentService"

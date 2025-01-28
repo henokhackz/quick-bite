@@ -36,10 +36,10 @@ const StudentForm = ({
   });
 
   const [photo1Preview, setPhoto1Preview] = useState<File | null | string>(
-    data?.photos[0].photoUrl || null
+   data?.photos!=undefined ? data?.photos[0].photoUrl : null
   );
   const [photo2Preview, setPhoto2Preview] = useState<File | null | string>(
-    data?.photos[1].photoUrl || null
+   data?.photos?.[1]?.photoUrl || null
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -108,9 +108,12 @@ const StudentForm = ({
         />{" "}
         <InputField
           label="password"
+          placeHolder="Enter new password (leave blank to keep current)"
           name="password"
+          
           register={register}
           error={errors.password}
+          
         />
         <div className="w-full">
           {}

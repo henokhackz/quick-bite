@@ -67,18 +67,18 @@ export const columns = [
     accessor: "info",
   },
   {
-    header: "Student ID",
-    accessor: "studentId",
+    header: "Username",
+    accessor: "username",
     className: "hidden md:table-cell",
   },
   {
-    header: "Assigned Cafteria",
-    accessor: "cafteria",
+    header: "Email",
+    accessor: "email",
     className: "hidden md:table-cell",
   },
   {
-    header: "Batch",
-    accessor: "batch",
+    header: "Phone Number",
+    accessor: "phone number",
     className: "hidden lg:table-cell",
   },
   {

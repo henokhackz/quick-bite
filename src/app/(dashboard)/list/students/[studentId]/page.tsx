@@ -12,9 +12,12 @@ const SingleStudentPage = async ({
   params: { studentId: string };
 }) => {
   let student = null;
+  let username = null;
   const id = params.studentId;
   try {
     student = await getStudentDetailsById(id);
+    username  = student.data?.username
+
   } catch (error) {
     console.log(error);
   }
@@ -45,7 +48,7 @@ const SingleStudentPage = async ({
             <div className="bg-primary/10 py-6 px-4 rounded-md flex-1 flex gap-4">
               <div className="w-1/3">
                 <Image
-                  src={student?.data?.photos[0].photoUrl as string}
+                  src={student?.data?.photos?.[0].photoUrl as string}
                   width={144}
                   height={144}
                   alt="student image"
@@ -122,7 +125,7 @@ const SingleStudentPage = async ({
             <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
               {role === "admin" && (
                 <>
-                  <FormModal table="student" type="delete" id={id} />
+                  <FormModal table="student" type="delete" username={username} data={student?.data} />
                   <FormModal
                     table="student"
                     type="update"

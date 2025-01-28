@@ -20,7 +20,7 @@ const StudentPicture = () => {
     const uploadPictures = async () => {
       if (pictures.length > 0) {
         setLoading(true)
-        setError(null) // Reset the error state before starting the upload
+        setError(null) 
 
         try {
           // Iterate through the pictures and upload each one

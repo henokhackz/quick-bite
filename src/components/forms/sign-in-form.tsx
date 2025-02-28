@@ -57,11 +57,13 @@ const SignInForm = () => {
 
      
       const session = await getSession();
+      console.log(session, 'sesion')
 
       // Handle role-based redirection
       if (session?.user ) {
         const role = session.user.role;
         if (role) {
+          console.log(role, 'role')
           router.push(`/${role.toLowerCase()}`);
         }
       }

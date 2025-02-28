@@ -6,7 +6,6 @@ import * as faceapi from "face-api.js";
 import CafteriaAccessTrackerTable from "@/components/cafteria-access-tracker-table";
 import { loadModels } from "@/hooks/useLoadModels";
 import { getStudentDetailsById, getStudentImages } from "@/lib/actions/admin.action";
-
 const videoConstraints = {
   width: 1280,
   height: 720,
@@ -14,14 +13,17 @@ const videoConstraints = {
 };
 
 interface DetectedStudent {
+  photo1:string;
   firstName: string;
   lastName: string;
   studentId: string;
   profilePicture: string;
+  id:string
+  photos: { photoUrl: string; photoId: string, studentId: string }[]
 }
 
 interface StudentImage {
-  photos: { photoUrl: string; photoId: string }[];
+  photos: { photoUrl: string; photoId: string, studentId: string }[];
 }
 
 type StudentImages = StudentImage[];
@@ -41,8 +43,10 @@ const CafteriaAccessTracker = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const imageCache = useRef<Map<string, HTMLImageElement>>(new Map());
+  const [error, setError] = useState<string | null>(null);
 
-  console.log(detectedStudent, "detected student");
+
+  console.log(error, "detected student");
   // Fetch student images once on mount
   useEffect(() => {
     const fetchImages = async () => {
@@ -198,8 +202,9 @@ const CafteriaAccessTracker = () => {
               matchResult?.isMatch ? "text-green-400" : "text-red-400"
             }`}
           >
-            {matchResult?.message}
+            {error?error : matchResult?.message}
           </h3>
+          
           <div className="relative h-full">
             <Webcam
               ref={webcamRef}
@@ -213,10 +218,11 @@ const CafteriaAccessTracker = () => {
               className="absolute top-0 left-0 rounded-2xl w-full pointer-events-none"
             />
           </div>
+          
         </div>
         <div className="w-full md:w-1/2 bg-cardBackground rounded-2xl flex flex-col items-center p-5 shadow-md">
           {detectedStudent && (
-            <CafteriaAccessTrackerTable detectedStudent={detectedStudent} />
+            <CafteriaAccessTrackerTable detectedStudent={detectedStudent as DetectedStudent}  setError={setError}/>
           )}
         </div>
       </div>

@@ -15,7 +15,6 @@ import { SubmitButton } from "../ui/submit-button";
 type Inputs = z.infer<typeof ticketHolderSchema>;
 
 const TicketHolderForm = ({
-  type,
   data,
   setOpen,
 }: {

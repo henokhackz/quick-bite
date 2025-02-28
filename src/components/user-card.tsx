@@ -1,11 +1,11 @@
 import { MoreVertical } from "lucide-react";
-import Image from "next/image";
 
 const UserCard = ({ type }: { type: string }) => {
   return (
     <div className="rounded-2xl odd:text-foreground even:text-dashboardForeground  odd:bg-primary/80 even:bg-cardBackground/80 p-4 flex-1 min-w-[130px]">
       <div className="flex justify-between items-center">
         <span className="text-[10px] bg-white px-2 py-1 rounded-full text-green-600">
+          
           2024/25
         </span>
         <MoreVertical size={20} className="text-gray-400" />

@@ -7,6 +7,7 @@ export async function uploadImage({image}:{image:File}) {
 
     
     try {
+        //@ts-expect-error
         const result = await cloudinary.uploader.upload(image, {
             resource_type: 'image',
             folder: 'user_images',

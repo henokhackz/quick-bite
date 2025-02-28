@@ -13,7 +13,7 @@ interface DetectedStudent {
 }
 
 export const createAttendance = async (detectedStudent: DetectedStudent) => {
-  // Early validation
+
   if (!detectedStudent || !detectedStudent.id ) {
     return {
       success: false,
@@ -22,9 +22,8 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
   }
 
   try {
-    const { firstName, lastName, photos, studentId } = detectedStudent;
+    const { firstName, lastName, photos } = detectedStudent;
 
-    // Ensure a photo exists for attendance record
     const photo1 = photos?.[0]?.photoUrl || "";
     if (!photo1) {
       return {
@@ -55,21 +54,21 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
       }
     }
 
-    // Create a new attendance record
+  
     const result = await prisma.attendance.create({
       data: {
-        studentId,
+        studentId:detectedStudent.id,
         studentName: `${firstName} ${lastName}`,
         studentPicture: photo1,
         cafeteria,
         mealType,
         checkInMethod: "fr", // Face recognition
         attended: true,
-        mealCost: "35", // Adjust dynamically if needed
+        mealCost: "35", 
       },
     });
 
-    // Revalidate attendance path to reflect updates
+    
     revalidatePath("/list/attendances");
 
     return {

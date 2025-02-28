@@ -96,7 +96,7 @@ const StudentListPage = ({
       <td className="flex items-center gap-4 p-4">
         {item?.ticketHolderPhoto?.[0] && (
           <Image
-            src={  item.ticketHolderPhoto[0]?.photoUrl}
+            src={  item.ticketHolderPhoto[0].photoUrl}
             alt="Ticket Holder"
             width={40}
             height={40}

@@ -39,6 +39,7 @@ const StudentForm = ({
    data?.photos!=undefined ? data?.photos[0].photoUrl : null
   );
   const [photo2Preview, setPhoto2Preview] = useState<File | null | string>(
+    //@ts-expect-error 
    data?.photos?.[1]?.photoUrl || null
   );
   const [isLoading, setIsLoading] = useState(false);

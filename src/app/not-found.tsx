@@ -17,11 +17,7 @@ const NotFoundPage = () => {
       : "/unauthorized";
   }, [role]);
 
-  let baseUlr:string;
-  if(window !== undefined){
-     baseUlr = window.location.origin;
-    
-  }
+  const baseUlr = process.env["NEXT_PUBLIC_BASE_URL"];
   const handleClick = () => {
     if (status === "authenticated") {
       router.push(baseUlr + pathname);

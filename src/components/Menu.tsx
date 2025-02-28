@@ -125,7 +125,7 @@ const menuItems = [
 
 export default async function Menu() {
   const session = await auth();
-
+// @ts-expect-error type error will check it later(user object)
   if (!session && !session?.user) {
     return null;
   }

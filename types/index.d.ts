@@ -142,6 +142,7 @@ export type TicketHolder = {
   firstName: string;
   lastName: string;
   role: Role;
+  ticketHolderPhoto:{photoUrl:string,photoId:string }[];
   phoneNumber?: string | null;
   email?: string;
   dateOfBirth: DateTime;

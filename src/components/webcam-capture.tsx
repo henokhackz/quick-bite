@@ -3,14 +3,13 @@ import { Camera } from "lucide-react";
 import { useCallback, useRef } from "react";
 import Webcam from "react-webcam";
 
-// Define video constraints for the webcam
 const videoConstraints = {
   width: 1280,
   height: 720,
   facingMode: "user"
 };
 
-export const WebcamCapture = ({ pictures, setPictures }: { pictures: File[], setPictures: React.Dispatch<React.SetStateAction<File[]>> }) => {
+export const WebcamCapture = ({setPictures }: { pictures: File[], setPictures: React.Dispatch<React.SetStateAction<File[]>> }) => {
 
   const webcamRef = useRef<Webcam>(null);
 
@@ -18,7 +17,7 @@ export const WebcamCapture = ({ pictures, setPictures }: { pictures: File[], set
     let imageSrc;
 
     if (webcamRef.current !== null) {
-      // Capture the screenshot from the webcam
+
       // @ts-ignore
       imageSrc = webcamRef.current.getScreenshot();
       const blob = new Blob([imageSrc!], { type: "image/jpeg" });

@@ -54,7 +54,7 @@ const SignInForm = () => {
         return;
       }
 
-      // Refetch session after successful sign-in
+     
       const session = await getSession();
 
       // Handle role-based redirection
@@ -81,10 +81,10 @@ const SignInForm = () => {
         >
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Image
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="logo"
-              width={24}
-              height={24}
+              width={30}
+              height={30}
               className="object-cover"
             />
             Cafe Management System

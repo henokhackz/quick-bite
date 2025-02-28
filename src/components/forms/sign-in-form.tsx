@@ -79,16 +79,19 @@ const SignInForm = () => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4"
         >
-          <h1 className="text-xl font-bold flex items-center gap-2">
+          <div className='flex flex-col gap-2 w-full justify-center items-center'>
             <Image
               src="/logo.png"
               alt="logo"
-              width={30}
-              height={30}
+              width={200}
+              height={200}
               className="object-cover"
             />
-            Cafe Management System
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            Cafe and dorm Management System
           </h1>
+
+          </div>
           <h2 className="text-gray-400">Sign in to your account</h2>
           {error && <ErrorMessage message={error} />}
           <div className="flex flex-col gap-2">

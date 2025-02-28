@@ -12,6 +12,15 @@ export async function middleware(req: NextRequest) {
   const role = token?.["role"];
   const authPath = "sign-in";
 
+//allow static files
+  if (
+    pathname.startsWith("/_next") || 
+    pathname.startsWith("/public") || 
+    pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico|mp4|mp3|woff|woff2|ttf|otf)$/) 
+  ) {
+    return NextResponse.next();
+  }
+
   // Redirect unauthenticated users to the login page
   if (!isLoggedIn) {
     if (!pathname.startsWith(`/${authPath}`)) {
@@ -54,5 +63,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon\\.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon\\.ico|public/.*).*)"],
 };

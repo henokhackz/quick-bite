@@ -94,6 +94,7 @@ const authConfig = {
       return session;
     },
   },
+  debug: true,
   pages: {
     signIn: "/sign-in",
   },

@@ -48,7 +48,8 @@ const SignInForm = () => {
         password: data.password,
         redirect: false, 
       });
-
+       
+      console.log(res, 'this is response from sign page')
       if (res?.error || !res?.ok) {
         setError("Invalid username or password");
         return;
@@ -58,7 +59,7 @@ const SignInForm = () => {
       const session = await getSession();
 
       // Handle role-based redirection
-      if (session?.user) {
+      if (session?.user ) {
         const role = session.user.role;
         if (role) {
           router.push(`/${role.toLowerCase()}`);

@@ -57,6 +57,7 @@ const SignInForm = () => {
 
      
       const session = await getSession();
+      console.log('this is weird session', session?.user)
       console.log(session, 'sesion')
 
       // Handle role-based redirection

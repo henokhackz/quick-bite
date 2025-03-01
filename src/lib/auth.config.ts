@@ -98,6 +98,7 @@ const authConfig = {
   pages: {
     signIn: "/sign-in",
   },
+ 
 };
 
 export default authConfig;

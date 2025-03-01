@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
   const role = token?.["role"];
   const authPath = "sign-in";
 
-  console.log(token, "token", role, "role", pathname, "pathname");
+  console.error(token, "token", role, "role", pathname, "pathname");
 
 //allow static files
   if (

@@ -8,9 +8,11 @@ export async function middleware(req: NextRequest) {
 
   const token = await getToken({ req, secret: process.env["AUTH_SECRET"] });
   const isLoggedIn = !!token;
-
+  
   const role = token?.["role"];
   const authPath = "sign-in";
+
+  console.log(token, "token", role, "role", pathname, "pathname");
 
 //allow static files
   if (

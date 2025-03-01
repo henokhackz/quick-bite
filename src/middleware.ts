@@ -12,8 +12,11 @@ export async function middleware(req: NextRequest) {
 
   console.log(secret, "secret");
   
-  const token = await getToken({ req, secret: process.env["AUTH_SECRET"] });
+  const token = await getToken({ req, secret: secret as string });
+
   const isLoggedIn = !!token;
+
+  console.log(isLoggedIn, "isLoggedIn", token, "token");
   
   const role = token?.["role"];
   const authPath = "sign-in";

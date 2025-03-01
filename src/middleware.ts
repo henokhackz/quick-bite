@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import {roleRoutes, routeAccessMap } from "./lib/settings";
 import { Role } from "@prisma/client";
+import { run } from "node:test";
 
 export async function middleware(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;
@@ -66,4 +67,5 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon\\.ico|public/.*).*)"],
+  runtime: "nodejs",
 };

@@ -3,9 +3,15 @@ import { getToken } from "next-auth/jwt";
 import {roleRoutes, routeAccessMap } from "./lib/settings";
 import { Role } from "@prisma/client";
 
+
+
 export async function middleware(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;
 
+  const secret = process.env["AUTH_SECRET"];
+
+  console.log(secret, "secret");
+  
   const token = await getToken({ req, secret: process.env["AUTH_SECRET"] });
   const isLoggedIn = !!token;
   

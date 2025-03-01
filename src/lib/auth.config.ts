@@ -23,6 +23,7 @@ const authConfig = {
         );
 
         const user = await getUserByUsername(username);
+        console.error(user, "user from auth config");
         if (!user) {
           console.log("User not found");
           return null;
@@ -35,7 +36,8 @@ const authConfig = {
           console.log("Invalid password");
           return null;
         }
-
+               
+        console.log(user, "user from auth config", isValid, 'isValid');
         return {
           id: user.id,
           name: user.username,
@@ -50,6 +52,7 @@ const authConfig = {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
       //  role based access control
+      
       const matchers = Object.keys(routeAccessMap).map((route) => ({
         matcher: (pathname: any) => pathname.startsWith(route),
         allowedRoles: routeAccessMap[route],

@@ -49,7 +49,6 @@ const SignInForm = () => {
         redirect: false, 
       });
        
-      console.log(res, 'this is response from sign page')
       if (res?.error || !res?.ok) {
         setError("Invalid username or password");
         return;
@@ -57,8 +56,6 @@ const SignInForm = () => {
 
      
       const session = await getSession();
-      console.log('this is weird session', session?.user)
-      console.log(session, 'sesion')
 
       // Handle role-based redirection
       if (session?.user ) {

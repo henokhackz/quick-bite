@@ -17,21 +17,13 @@ export async function middleware(req: NextRequest) {
   const user = session?.user
   const role = user?.role;
 
-
-  if(user){
-    console.log('auth started here ')
-  console.error(user, "auth session really");
-    
-  }
   
 
   const isLoggedIn = !!user;
 
-  console.log(isLoggedIn, "isLoggedIn");
   
   const authPath = "sign-in";
 
-  console.log(role, "role", pathname, "pathname");
 
 //allow static files
   if (

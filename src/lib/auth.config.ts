@@ -52,7 +52,7 @@ const authConfig = {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
       //  role based access control
-      
+
       const matchers = Object.keys(routeAccessMap).map((route) => ({
         matcher: (pathname: any) => pathname.startsWith(route),
         allowedRoles: routeAccessMap[route],
@@ -82,7 +82,7 @@ const authConfig = {
       return isLoggedIn;
     },
     jwt({ token, user, trigger, session }: any) {
-      console.log("JWT callback triggered:", { token, user });
+      console.log("JWT callback triggered:", { token, user , trigger, session});
       if (user) {
         token.id = user.id as string;
         token.role = user.role as string;
@@ -93,6 +93,7 @@ const authConfig = {
       return token;
     },
     session({ session, token }: any) {
+      console.log("Session callback triggered:", { session, token });
       session.user.id = token.id;
       session.user.role = token.role;
       return session;

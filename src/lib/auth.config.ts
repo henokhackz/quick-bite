@@ -82,7 +82,6 @@ const authConfig = {
       return isLoggedIn;
     },
     jwt({ token, user, trigger, session }: any) {
-      console.log("JWT callback triggered:", { token, user , trigger, session});
       if (user) {
         token.id = user.id as string;
         token.role = user.role as string;

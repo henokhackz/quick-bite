@@ -1,27 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "./lib/auth";
 import {roleRoutes, routeAccessMap } from "./lib/settings";
 import { Role } from "@prisma/client";
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+};
 
 
 export async function middleware(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;
+  const  session = await auth() as { user: User | null };  
+  const user = session?.user
+  const role = user?.role;
 
-  const secret = process.env["AUTH_SECRET"];
 
-  console.log(secret, "secret");
+  if(user){
+    console.log('auth started here ')
+  console.error(user, "auth session really");
+    
+  }
   
-  const token = await getToken({ req, secret: secret as string });
 
-  const isLoggedIn = !!token;
+  const isLoggedIn = !!user;
 
-  console.log(isLoggedIn, "isLoggedIn", token, "token");
+  console.log(isLoggedIn, "isLoggedIn");
   
-  const role = token?.["role"];
   const authPath = "sign-in";
 
-  console.log(token, "token", role, "role", pathname, "pathname");
+  console.log(role, "role", pathname, "pathname");
 
 //allow static files
   if (

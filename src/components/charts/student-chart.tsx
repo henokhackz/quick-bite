@@ -1,5 +1,6 @@
 "use client";
-import { User, Users } from "lucide-react";
+import { User} from "lucide-react";
+import Image from "next/image";
 import { RadialBarChart, RadialBar, ResponsiveContainer } from "recharts";
 
 const data = [
@@ -22,11 +23,13 @@ const data = [
     name: "Normal",
     count: 53,
     fill: "#4361ee",
+    opacity: 0.2,
   },
   {
     name: "Fasters",
     count: 53,
     fill: "#4cc9f0",
+    opacity: 0.2,
   },
 ];
 
@@ -51,22 +54,25 @@ const StudentChart = () => {
             <RadialBar background dataKey="count" />
           </RadialBarChart>
         </ResponsiveContainer>
-        <Users
-          size={50}
+        <Image
+          src="/Student.jpg"
+          alt="student"
+          width={100}
+          height={100}
           className="absolute text-gray-400 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
         />
       </div>
       {/* BOTTOM */}
       <div className="flex justify-center gap-16 text-cardForeground/80">
         <div className="flex flex-col gap-1 items-center">
-          <div className="w-5 h-5 bg-primary/50 rounded-full" />
+          <div className="w-5 h-5 bg-primary/20 rounded-full" />
           <h1 className="font-bold">1,234</h1>
           <h2 className="text-xs text-gray-300 flex items-center">
             <User size={12} className="mr-1" />
             Special (55%)
           </h2>
         </div>
-        <div className="flex flex-col gap-1 items-center">
+        <div className="flex-col gap-1 items-center lg:flex hidden">
           <div className="w-5 h-5 bg-primaryLight/50 rounded-full" />
           <h1 className="font-bold">1,234</h1>
           <h2 className="text-xs text-gray-300 flex items-center">
@@ -74,8 +80,8 @@ const StudentChart = () => {
             Scholars (45%)
           </h2>
         </div>
-        <div className="flex flex-col gap-1 items-center">
-          <div className="w-5 h-5 bg-primary/50 rounded-full" />
+        <div className="flex-col gap-1 items-center lg:flex hidden">
+          <div className="w-5 h-5 bg-primary/20 rounded-full" />
           <h1 className="font-bold">1,234</h1>
           <h2 className="text-xs text-gray-300 flex items-center">
             <User size={12} className="mr-1" />

@@ -46,8 +46,6 @@ const CafteriaAccessTracker = () => {
   const [error, setError] = useState<string | null>(null);
 
 
-  console.log(error, "detected student");
-  // Fetch student images once on mount
   useEffect(() => {
     const fetchImages = async () => {
       try {

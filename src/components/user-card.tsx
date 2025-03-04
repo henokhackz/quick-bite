@@ -2,7 +2,7 @@ import { MoreVertical } from "lucide-react";
 
 const UserCard = ({ type }: { type: string }) => {
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-white/80 to-white/60  backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex-1 min-w-[150px] border border-white/20">
+    <div className="rounded-2xl bg-gradient-to-br from-white to-white/80  backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex-1 min-w-[150px] border border-white/20">
       {/* Header */}
       <div className="flex justify-between items-center">
         <span className="text-[10px] bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">

@@ -38,7 +38,7 @@ const menuItems = [
         visible: ["admin", "student"],
       },
       {
-        label: "Feedback",
+        label: "Feedbacks",
         icon: MessageSquare,
         href: "/list/feedbacks",
         visible: ["admin", "students", "studentService"],
@@ -55,12 +55,12 @@ const menuItems = [
         href: "/list/students",
         visible: ["admin", 'ticketHolder'],
       },{
-        label: "announcements",
+        label: "Announcements",
         icon:Megaphone,
         href: "/list/announcements",
         visible: ["admin", "ticketHolder", "studentService"],
       },{
-        label: "chats",
+        label: "Chats",
         icon: MessageCircleMoreIcon,
         href: "/list/chats",
         visible: ["admin","ticketHolder", "studentService"],
@@ -101,7 +101,7 @@ export default async function Menu() {
   return (
     <div className="w-full bg-white backdrop-blur-2xl min-h-screen p-2 shadow-md flex flex-col items-center h-full max-h-screen overflow-y-scroll sticky top-0 left-0">
       {/* Logo */}
-      <div className="w-full flex items-center justify-center flex-col mb-4  rounded-lg bg-primary/10 py-2 md:py-4 px-2">
+      <div className="w-full flex items-center justify-center flex-col mb-4  rounded-lg bg-gray-100 py-2 md:py-4 px-2">
       <Image src={image || '/avatar.png'} alt="Logo" height={40} width={40} className="mb-4 object-cover rounded-full" />
         <h1 className="text-lg font-semibold text-dashboardForeground/80 hidden md:block">{name}</h1>
         <p className="text-sm text-dashboardForeground/80 hidden md:block">{email}</p>

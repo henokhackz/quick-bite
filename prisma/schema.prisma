@@ -35,6 +35,11 @@ model User {
   hashedPassword String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+   status      String   @default("offline") 
+  lastSeen    DateTime @default(now())
+
+ 
+
 
   // Relations
   sessions       Session[]
@@ -45,6 +50,10 @@ model User {
   ticketHolder   TicketHolder[]
   studentService StudentService[]
   Student        Student[]
+   sentMessages    Message[] 
+  chatRooms   ChatRoomUser[]
+  notifications Notification[]
+  
 }
 
 model Account {
@@ -224,6 +233,56 @@ model Attendance {
   userId         String?  @db.ObjectId
 }
 
+model ChatRoom {
+  id        String   @id @default(cuid()) @map("_id")
+  name      String?  // Only for group chats
+  type      ChatType // PERSONAL | GROUP
+  isPrivate Boolean  @default(false) 
+
+  messages   Message[]
+  users      ChatRoomUser[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ChatRoomUser {
+  id        String   @id @default(cuid()) @map("_id")
+  chatRoomId String
+  role      UserRole 
+
+  userId    String?  @db.ObjectId
+  user      User?     @relation(fields: [userId], references: [id])
+  chatRoom  ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(cuid()) @map("_id")
+  text        String
+  senderId    String?   @db.ObjectId
+  chatRoomId  String
+  isRead      Boolean  @default(false)
+  sender      User?     @relation(fields: [senderId], references: [id])
+  chatRoom    ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+
+}
+
+model Notification {
+ id        String   @id @default(cuid()) @map("_id")
+  userId    String   @db.ObjectId
+  type      String   
+  isRead    Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
 enum Method {
   fr
   qrCode
@@ -239,4 +298,14 @@ enum Role {
   studentService
   ticketHolder
   admin
+}
+
+enum ChatType {
+  PERSONAL
+  GROUP
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
 }

@@ -23,7 +23,6 @@ const authConfig = {
         );
 
         const user = await getUserByUsername(username);
-        console.error(user, "user from auth config");
         if (!user) {
           console.log("User not found");
           return null;
@@ -37,7 +36,6 @@ const authConfig = {
           return null;
         }
                
-        console.log(user, "user from auth config", isValid, 'isValid');
         return {
           id: user.id,
           name: user.username,
@@ -92,7 +90,6 @@ const authConfig = {
       return token;
     },
     session({ session, token }: any) {
-      console.log("Session callback triggered:", { session, token });
       session.user.id = token.id;
       session.user.role = token.role;
       return session;

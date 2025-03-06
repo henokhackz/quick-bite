@@ -18,6 +18,7 @@ const ChatPage = async ({ params }: { params: { chatId: string } }) => {
       users: { include: { user: true } }
     }
   });
+ 
 
   if (!chat) {
     return notFound(); 

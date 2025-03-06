@@ -2,11 +2,12 @@
 import { User } from '@prisma/client'
 import { Loader2, MoreVertical, X } from 'lucide-react'
 import React, { useState } from 'react'
-import ChatUserCard from './chat-user-card'
+import { ChatUserCard } from './chat-user-card';
 
-type UserModalProps = { users: User[]; isLoading: boolean };
 
-const UserModal = ({ users, isLoading }: UserModalProps) => {
+type UserModalProps = { users: User[]; isLoading: boolean ; groupId: string};
+
+const UserModal = ({ users, isLoading , groupId}: UserModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -37,7 +38,7 @@ const UserModal = ({ users, isLoading }: UserModalProps) => {
                 </div>
               ) : (
                 users.length > 0 ? (
-                  users.map((user) => <ChatUserCard key={user.id} user={user} />)
+                  users.map((user) => <ChatUserCard key={user.id} user={user} groupId={groupId}/>)
                 ) : (
                   <p className='text-gray-500 text-center'>No users found</p>
                 )

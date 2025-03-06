@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -8,70 +7,56 @@ import { useEffect, useState } from "react";
 import { User } from "@prisma/client";
 import { getUsers } from "@/lib/actions/chat.action";
 import { toast } from "react-toastify";
-import { Loader2 } from "lucide-react";
-
-
-
-
 
 export default function ChatHeader({ chatData }: { chatData: ChatWindowProps }) {
   const isPersonal = chatData.type === "PERSONAL";
   const { data: session } = useSession();
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
+  console.log(chatData.id, "chat id");
+  console.log(isPersonal, "is personal");
 
-  useEffect(()=>{
+  // Fetch users on chatData.id change
+  useEffect(() => {
     const fetchUsers = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true)
-        const {success, data} = await getUsers()
-        if(success && data){
-          setUsers(data)
-          setIsLoading(false)
+        const { success, data } = await getUsers();
+        if (success && data) {
+          setUsers(data);
+        } else {
+          toast.error("Failed to load users. Please try again.");
         }
-      if(!success || !data){
-        toast.error('something went wrong probably its my shitty code ')
-
-      }
-      setIsLoading(false)
       } catch (error) {
-        console.log(error);
-        setIsLoading(false)
-        toast.error('something went wrong probably its my shitty code ')
-
+        console.error("Error fetching users:", error);
+        toast.error("An unexpected error occurred while fetching users.");
+      } finally {
+        setIsLoading(false);
       }
-    }
-    fetchUsers()
-  }, [])
+    };
+
+    // Reset state when chatData.id changes
+    setUsers([]);
+
+    fetchUsers();
+  }, [chatData.id]);
 
 
-  // Find the other user in a personal chat
-  const sender = isPersonal
-    ? chatData.users?.find((user) => user.id !== session?.user?.id)
-    : null;
 
-  const chatName = isPersonal ? sender?.user.name ?? "Unknown User" : chatData.name;
-  // const avatar = isPersonal ? sender?.avatar ?? "/avatar.png" : "/group-avatar.png";
+  const status = isPersonal ? "Offline" : chatData.description;
+  const receiver = chatData.users.find(chatRoom=>chatRoom.user.id !== session?.user.id)
+  const chatName = isPersonal ? receiver?.user.name : chatData.name;
 
-  // const status = isPersonal
-  //   ? sender?.status === "online"
-  //     ? "Online"
-  //     : `Last seen: ${sender?.lastSeen ? new Intl.DateTimeFormat("en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(sender.lastSeen)) : "Unknown"}`
-  //   : `${chatData.users?.length ?? 0} members online`;
-
-  const status = 'offline'
-
-  console.log(chatData.users?.[0], 'user data')
+  console.log(chatData, "chat data", receiver, 'receiver', chatName, 'chat name');
 
   return (
     <div className="flex items-center justify-between p-4 border-b bg-white">
       {/* Avatar & Info */}
-      
       <Link href={"/list/chats"} className="flex items-center gap-3">
-         <div className="flex gap-2 items-center justify-center">
+        <div className="flex gap-2 items-center justify-center">
           <Image
-            src={'/avatar.png'}
+            src={"/avatar.png"}
             alt="Avatar"
             height={40}
             width={40}
@@ -80,15 +65,16 @@ export default function ChatHeader({ chatData }: { chatData: ChatWindowProps }) 
         </div>
         <div>
           <h2 className="text-lg font-semibold">{chatName}</h2>
-         
-          <p className="text-sm text-gray-500">{chatData.type === "PERSONAL"? status : chatData.description }</p>
+          <p className="text-sm text-gray-500">{status}</p>
         </div>
       </Link>
 
       {/* More Options */}
       <div className="flex gap-2 items-center justify-center">
-        {isLoading ?<Loader2  size={20} className='text-gray-500 hover:gray-600'/> :  <UserModal users={users} isLoading={isLoading}/>}
-        </div>
+        {!isLoading && chatData.type === "GROUP" && (
+          <UserModal users={users} isLoading={isLoading} groupId={chatData.id} />
+        )}
+      </div>
     </div>
   );
 }

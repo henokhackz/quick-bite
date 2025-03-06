@@ -101,3 +101,11 @@ export const signInSchema = z.object({
     .min(8, "Password must be at least 8 characters long")
     .max(32, "Password must be less than 32 characters long"),
 });
+
+export type GroupForm = z.infer<typeof groupSchema>;
+
+export const groupSchema = z.object({
+  name: z.string().min(1, { message: "Group name is required!" }),
+  description: z.string().min(1, { message: "Description is required!" }),
+  isPrivate: z.boolean(),
+});

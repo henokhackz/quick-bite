@@ -23,7 +23,7 @@ const SortModal: React.FC = () => {
       const params = new URLSearchParams(searchParams?.toString());
       params.set("sortBy", selectedOption);
       router.push(`${window.location.pathname}?${params.toString()}`);
-      toggleModal(); // Close the modal after sorting
+      toggleModal(); 
     }
   };
 

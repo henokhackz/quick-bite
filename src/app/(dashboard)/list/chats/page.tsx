@@ -22,7 +22,7 @@ export default function ChatList() {
   const router = useRouter();
   const { data: session } = useSession();
   const [chats, setChats] = useState<ChatRoomType[] | []>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -54,7 +54,7 @@ export default function ChatList() {
   }
 
   return (
-    <div className="flex flex-col p-5 space-y-4 w-full rounded-lg">
+    <div className="flex flex-col p-5 space-y-4 w-full rounded-lg max-h-screen overflow-y-scroll">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Chats</h1>
@@ -68,7 +68,7 @@ export default function ChatList() {
       </div>
 
       {/* Chat List */}
-      <div className="space-y-4 bg-white rounded-lg shadow p-4 max-h-screen overflow-y-scroll">
+      <div className="space-y-4 bg-white rounded-lg shadow p-4 ">
         {chats.length === 0 ? (
           <p className="text-gray-500">No chats available</p>
         ) : (
@@ -92,7 +92,7 @@ export default function ChatList() {
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div className="ml-4 flex-1">
-                  <h2 className="font-semibold text-gray-800">
+                  <h2 className="font-semibold text-gray-800 text-md">
                     {chat.type === "PERSONAL" ? otherUser?.user?.name : chat.name}
                   </h2>
                   <p className="text-sm text-gray-500 truncate w-[180px]">

@@ -4,9 +4,10 @@ import { GroupForm, groupSchema } from "../schema/schema";
 
 import { revalidatePath } from "next/cache";
 import {pusher} from '@/lib/pusher/pusher'
+import { User, UserRole } from "@prisma/client";
 
 
-export const createGroup = async (data:GroupForm, ownerId:string) => {
+export const createGroup = async (data:GroupForm, ownerId:string, users?:User[]) => {
 
     const validated = groupSchema.safeParse(data);
     
@@ -17,12 +18,13 @@ export const createGroup = async (data:GroupForm, ownerId:string) => {
             message: 'Invalid data'
         }
     }
+    const { name, description, isPrivate} = validated.data
 
     try {
 
     const existingGroup = await prisma.chatRoom.findFirst({
         where: {
-            name: validated.data.name
+            name,
         }
     })
 
@@ -34,15 +36,50 @@ export const createGroup = async (data:GroupForm, ownerId:string) => {
         }
     }
 
+
+
+    if(!users || users.length <=2){
+        return {
+            success:false,
+            message:"Group must have at least 3 members",
+            data:null,
+        }
+        
+    }
+    const userIds = [...users.map((user) => ({id:user.id})), {id:ownerId, role:"ADMIN"}] as {id:string, role:UserRole}[]
+
     const group = await prisma.chatRoom.create({
         data: {
-            name: validated.data.name,
-            description: validated.data.description,
-            isPrivate: validated.data.isPrivate,
+            name,
+            description,
+            isPrivate,
             type:'GROUP',
-             ownerId
-        }
+            ownerId
+        },
     });
+
+       await prisma.chatRoomUser.createMany({
+        data: userIds.map((user) => ({
+          userId: user.id,
+          chatRoomId: group.id,
+          role: user?.role || "MEMBER",
+        })
+    ),     
+      });
+
+    const groupUsers = await prisma.chatRoomUser.findMany({
+        where:{
+            chatRoomId:group.id
+        },
+        include:{
+            user:true
+        }
+    })
+    groupUsers.forEach((user) => {
+        pusher.trigger(user.id, 'new-group', {
+            group: group,
+          });
+    })
     console.log(group)
     return {
         success:true,
@@ -95,10 +132,12 @@ export const addUserToGroup = async (userId:string, groupId:string) => {
         const existingGroup = await prisma.chatRoom.findUnique({
             where: {
                 id:groupId
+            },
+            include:{
+                users:true
             }
         })
 
-        console.log(existingGroup, "existing group", groupId, 'group id ')
         if(!existingGroup){
             console.log("Group does not exist")
             return {
@@ -128,6 +167,13 @@ export const addUserToGroup = async (userId:string, groupId:string) => {
                 chatRoom: { connect: { id: groupId } }
             }
         });
+
+
+        existingGroup.users.forEach((user) => {
+            pusher.trigger(user.id, 'new-group-user', {
+                group: existingGroup,
+              });
+        })
         return {
             success:true,
             data:groupUser
@@ -164,17 +210,71 @@ export const getGroups = async () => {
 }
 
 export const createMessage = async (message:string, senderId:string, groupId:string) => {
+    if(!message || !senderId || !groupId){
+        return {
+            success:false,
+            data:null
+        }
+    }
+
+     
     try {
+        const existingGroup = await prisma.chatRoom.findUnique({
+            where: {
+                id:groupId
+            },
+            include:{
+                messages:true
+            }
+        })
+
+        if(!existingGroup){
+            return {
+                success:false,
+                data:null
+            }
+        }
+     //get message sender ids and make sure they are not null
+    const messageSenderIds = existingGroup.messages
+  .map((message) => message?.senderId) 
+  .filter((id): id is string => id !== null && id !== undefined); 
+
         const message1 = await prisma.message.create({
             data: {
                 text: message,
                 sender: { connect: { id: senderId } },
-                chatRoom: { connect: { id: groupId } }
+                chatRoom: { connect: { id: groupId } ,
+                 
+                
+            },
+            seenIds:[...messageSenderIds, senderId]
+            
+
+
             }
         });
+        const chatUser = await prisma.chatRoomUser.findFirst({
+            where: {
+                chatRoomId:groupId,
+                userId:senderId
+            }
+        })
 
-        pusher.trigger('chat', 'new-message', {
-            data:message1
+        
+        await prisma.chatRoomUser.update({
+            where:{
+            chatRoomId:groupId,
+            userId:senderId,
+            id:chatUser?.id
+
+            },
+            data:{
+                user: { connect: { id: senderId } }
+
+            }
+        })
+        pusher.trigger(groupId, 'new-message', {
+            messages:[message1]
         })
         
         return {
@@ -249,10 +349,32 @@ export const createConversation = async (senderId:string, recieverId:string) => 
             ]
         
              },
-             include: { users: true },
+             include: { users: true, messages:true },
            });
-
+    
            if (existingConversation) {
+
+
+            const lastMessage = existingConversation.messages[existingConversation.messages.length - 1];
+
+            if (lastMessage) {
+                await prisma.message.update({
+                    where:{
+                        id:lastMessage.id
+                    },
+                    data:{
+                       seenIds:{
+                        push:senderId
+                       } 
+                    }
+                })
+            }
+
+            pusher.trigger(existingConversation.id, 'new-message', {
+                messages:[lastMessage]
+            })
+
+            revalidatePath(`/list/chats/${existingConversation.id}`)
             return {
                 success: true,
                 data: existingConversation,

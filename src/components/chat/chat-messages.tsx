@@ -3,7 +3,7 @@
 import { Message } from "@prisma/client";
 import { useEffect, useRef } from "react";
 
-export default function ChatMessages({ messages, currentUserId }: { messages: Message[]; currentUserId: string }) {
+export default function ChatMessages({ messages, currentUserId }: { messages: Message[]; currentUserId: string , chatId:string}) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to the latest message
@@ -12,7 +12,7 @@ export default function ChatMessages({ messages, currentUserId }: { messages: Me
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-scroll  p-4 bg-gray-100 min-h-[200px] lg:min-h-[400px] lg:max-h-[450px] rounded-lg ">
+    <div className="flex-1 overflow-y-scroll  p-4 bg-gray-100 h-full rounded-lg ">
       {messages.map((msg) => (
         <div key={msg.id} className={`flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"} mb-2`}>
           <div

@@ -14,10 +14,6 @@ export default function ChatHeader({ chatData }: { chatData: ChatWindowProps }) 
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log(chatData.id, "chat id");
-  console.log(isPersonal, "is personal");
-
-  // Fetch users on chatData.id change
   useEffect(() => {
     const fetchUsers = async () => {
       setIsLoading(true);
@@ -47,8 +43,6 @@ export default function ChatHeader({ chatData }: { chatData: ChatWindowProps }) 
   const status = isPersonal ? "Offline" : chatData.description;
   const receiver = chatData.users.find(chatRoom=>chatRoom.user.id !== session?.user.id)
   const chatName = isPersonal ? receiver?.user.name : chatData.name;
-
-  console.log(chatData, "chat data", receiver, 'receiver', chatName, 'chat name');
 
   return (
     <div className="flex items-center justify-between p-4 border-b bg-white">

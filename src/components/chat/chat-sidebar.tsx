@@ -18,12 +18,12 @@ const dummyGroups = [
 const ChatSidebar = () => {
   const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const { data: session } = useSession()
 
   useEffect(() => {
     const fetchUsers = async () => {
-      setIsLoading(true)
+
       try {
         const { success, data } = await getUsers()
         if (success && data) {

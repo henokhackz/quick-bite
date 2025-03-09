@@ -1,4 +1,4 @@
-# Lama Dev School Management Dashboard
+#  Cafe Management Dashboard
 
 ## Getting Started
 

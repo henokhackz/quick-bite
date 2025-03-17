@@ -224,7 +224,8 @@ export const createMessage = async (message:string, senderId:string, groupId:str
                 id:groupId
             },
             include:{
-                messages:true
+                messages:true,
+                users:true
             }
         })
 
@@ -244,6 +245,7 @@ export const createMessage = async (message:string, senderId:string, groupId:str
                 text: message,
                 sender: { connect: { id: senderId } },
                 chatRoom: { connect: { id: groupId } ,
+            
                  
                 
             },
@@ -253,14 +255,14 @@ export const createMessage = async (message:string, senderId:string, groupId:str
 
             }
         });
-        const chatUser = await prisma.chatRoomUser.findFirst({
-            where: {
-                chatRoomId:groupId,
-                userId:senderId
-            }
-        })
+       
+        const chatUser = existingGroup.users.find((user) => user.userId === senderId);
 
-        
+        if (!chatUser) {
+            console.log("User not found in group");
+            return { success: false, data: null };
+        }
+
         await prisma.chatRoomUser.update({
             where:{
             chatRoomId:groupId,
@@ -273,9 +275,25 @@ export const createMessage = async (message:string, senderId:string, groupId:str
 
             }
         })
-        pusher.trigger(groupId, 'new-message', {
+        console.log("🚀 Triggering Pusher for chat:", groupId, {
+         messages: [message1],
+        });
+        
+        const updatedConversation = await prisma.chatRoom.findUnique({
+            where:{id:groupId},
+            include:{messages:true, users:{include:{user:true}}}
+        })
+        const lastMessage = updatedConversation?.messages[updatedConversation.messages.length - 1];
+      
+        updatedConversation?.users.forEach(({user}) => {
+            pusher.trigger(user?.id as string, 'update-message', {
+                messages:[lastMessage]
+            })
+        })
+        await  pusher.trigger(groupId, 'new-message',{
             messages:[message1]
         })
+
         
         return {
             success:true,
@@ -405,4 +423,50 @@ export const createConversation = async (senderId:string, recieverId:string) => 
             data:null
         }
     }
+}
+
+
+
+export const seenConversation = async (currentUserId:string, conversationId:string) => {
+    try {
+        const conversation = await prisma.chatRoom.findUnique({
+            where:{id:conversationId},
+            include:{messages:true}
+        })
+
+        if(!conversation){
+            return {
+                success:false,
+                data:null
+            }
+        }
+
+        const lastMessage = conversation.messages[conversation.messages.length - 1];
+        await prisma.message.update({
+            where:{
+                id:lastMessage.id
+            },
+            data:{
+               seenIds:{
+                push:currentUserId
+               }
+            }
+        })
+
+       await pusher.trigger(conversationId, 'update-message', {
+            messages:[lastMessage]
+        })
+        
+        return {
+            success:true,
+            data:conversation
+        }
+
+}catch(error) {
+    console.log(error)
+    return {
+        success:false,
+        data:null
+    }
+}
 }

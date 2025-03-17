@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { LegacyRef, useState } from "react";
 import  Picker  from "@emoji-mart/react";
 import * as data from "@emoji-mart/data";
 import { Smile, Send } from "lucide-react";
 
-export default function ChatInput({ onSendMessage }: { onSendMessage: (message: string) => void }) {
+export default function ChatInput({ onSendMessage, bottomRef }: { onSendMessage: (message: string) => void, bottomRef:LegacyRef<HTMLDivElement> | undefined }) {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -22,7 +22,7 @@ export default function ChatInput({ onSendMessage }: { onSendMessage: (message: 
   };
 
   return (
-    <div className="relative flex items-center border-t p-2 bg-white">
+    <div className="relative flex items-center border-t p-2 bg-white" >
       {/* Emoji Picker */}
       {showEmojiPicker && (
         <div className="absolute bottom-12 left-2">
@@ -42,6 +42,8 @@ export default function ChatInput({ onSendMessage }: { onSendMessage: (message: 
         placeholder="Type a message..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
+        ref={bottomRef as LegacyRef<HTMLInputElement>}
+       
       />
 
       {/* Send Button */}

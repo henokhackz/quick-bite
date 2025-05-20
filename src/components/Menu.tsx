@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   Home,
   CheckSquare,
-  Wallet,
   MessageSquare,
   Ticket,
   Users,
@@ -13,6 +12,7 @@ import {
   LogOut,
   Megaphone,
   MessageCircleMoreIcon,
+  Building
 } from "lucide-react";
 
 const menuItems = [
@@ -32,22 +32,16 @@ const menuItems = [
         visible: ["admin", "student"],
       },
       {
-        label: "Meal Costs",
-        icon: Wallet,
-        href: "/list/meal-costs",
-        visible: ["admin", "student"],
-      },
-      {
         label: "Feedbacks",
         icon: MessageSquare,
         href: "/list/feedbacks",
-        visible: ["admin", "students", "studentService"],
+        visible: ["admin", "student", "studentService"],
       },
       {
         label: "Ticket Holders",
         icon: Ticket,
         href: "/list/ticket-holders",
-        visible: ["admin"],
+        visible: ["admin"]
       },
       {
         label: "Students",
@@ -63,6 +57,12 @@ const menuItems = [
         label: "Chats",
         icon: MessageCircleMoreIcon,
         href: "/list/chats",
+        visible: ["admin","ticketHolder", "studentService"],
+      },
+      {
+        label: "Dorm",
+        icon: Building,
+        href: "/list/dorm",
         visible: ["admin","ticketHolder", "studentService"],
       },
     ],

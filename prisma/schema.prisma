@@ -36,7 +36,7 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   status         String    @default("offline")
-  lastSeen       DateTime?  @default(now())
+  lastSeen       DateTime? @default(now())
 
   // Relations
   sessions       Session[]
@@ -52,6 +52,7 @@ model User {
   notifications  Notification[]
 
   ChatRoom ChatRoom[]
+  Feedback Feedback[]
 }
 
 model Account {
@@ -233,7 +234,7 @@ model Attendance {
 
 model ChatRoom {
   id          String         @id @default(cuid()) @map("_id")
-  name        String?    @unique // Only for group chats
+  name        String?        @unique // Only for group chats
   description String? // Only for group chats
   type        ChatType       @default(PERSONAL)
   isPrivate   Boolean        @default(false)
@@ -266,10 +267,9 @@ model Message {
   sender     User?    @relation(fields: [senderId], references: [id])
   chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
   seenIds    String[] @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
-
 
 model Notification {
   id        String   @id @default(cuid()) @map("_id")
@@ -279,6 +279,31 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Feedback {
+  id     String @id @default(cuid()) @map("_id")
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  title   String
+  message String
+
+  roles    String[]
+  photoUrl String?
+
+  status FeedbackStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum FeedbackStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
 }
 
 enum Method {
@@ -296,6 +321,7 @@ enum Role {
   studentService
   ticketHolder
   admin
+  dormManager
 }
 
 enum ChatType {

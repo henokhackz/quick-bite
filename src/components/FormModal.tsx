@@ -23,6 +23,11 @@ const StudentForm = dynamic(() => import("./forms/student-form"), {
     <div className="h-5 w-5 animate-spin text-primary p-2 shadow-md"></div>
   ),
 });
+const FeedbackForm = dynamic(() => import("./forms/feedback-form"), {
+  loading: () => (
+    <div className="h-5 w-5 animate-spin text-primary p-2 shadow-md"></div>
+  ),
+})
 const StudentService = dynamic(() => import("./forms/student-service-form"), {
   loading: () => (
     <div className=" h-5 w-5 md:h-10 md:w-10  animate-spin text-primary p-2 shadow-md"></div>
@@ -49,6 +54,10 @@ const forms: {
     //@ts-expect-error type error will check it later
     <StudentService type={type} data={data} setOpen={setOpen} />
   ),
+  feedback: (type, data, setOpen) => (
+    //@ts-expect-error type error will check it later
+    <FeedbackForm type={type} data={data} setOpen={setOpen} />
+  ),
 };
 
 const FormModal = ({
@@ -62,6 +71,7 @@ const FormModal = ({
     | "ticketHolder"
     | "studentService"
     | "announcement"
+    | "feedback"
     | "update";
   type: "create" | "update" | "delete";
   data?: any;

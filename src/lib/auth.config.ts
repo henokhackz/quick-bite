@@ -73,7 +73,7 @@ const authConfig = {
           newUrl.pathname = `${rolePath}`;
           return Response.redirect(new URL(newUrl, nextUrl));
         }
-        return true; // Allow access to auth pages if not logged in
+        return true; 
       }
 
       // Allow access if the user is authenticated

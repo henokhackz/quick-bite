@@ -13,19 +13,19 @@ const SingleUserPage = async () => {
     const res = await getUserById(userId as string);
     user = res?.data;
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching user data:", error);
   }
 
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold text-red-500">User not found</h1>
+        <h1 className="text-2xl font-bold text-red-500">User  not found</h1>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
+    <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row min-h-screen">
       <Suspense
         fallback={
           <div className="w-full h-full flex items-center justify-center">
@@ -43,8 +43,8 @@ const SingleUserPage = async () => {
                   src={user.image || "/default-avatar.png"}
                   width={100}
                   height={100}
-                  alt="User image"
-                  className="w-36 h-36 rounded-full object-contain"
+                  alt="User  image"
+                  className="w-36 h-36 rounded-full object-cover"
                 />
               </div>
               <div className="w-2/3 flex flex-col justify-between gap-4">
@@ -89,19 +89,19 @@ const SingleUserPage = async () => {
 
             {/* STATS CARDS */}
             <div className="flex-1 flex gap-4 justify-between flex-wrap">
-              <div className="bg-white p-4 rounded-md w-full md:w-[48%] xl:w-[45%]">
+              <div className="bg-white p-4 rounded-md w-full md:w-[48%] xl:w-[45%] shadow-md">
                 <h1 className="text-md font-semibold">Account Status</h1>
                 <span className="text-sm text-gray-400 capitalize">
                   {user.status}
                 </span>
               </div>
-              <div className="bg-white p-4 rounded-md w-full md:w-[48%] xl:w-[45%]">
+              <div className="bg-white p-4 rounded-md w-full md:w-[48%] xl:w-[45%] shadow-md">
                 <h1 className="text-md font-semibold">Created At</h1>
                 <span className="text-sm text-gray-400">
                   {new Date(user.createdAt).toLocaleString()}
                 </span>
               </div>
-              <div className="bg-white p-4 rounded-md w-full md:w-[48%] xl:w-[45%]">
+              <div className="bg-white p-4 rounded-md w-full md:w-[48%] xl:w-[45%] shadow-md">
                 <h1 className="text-md font-semibold">Updated At</h1>
                 <span className="text-sm text-gray-400">
                   {new Date(user.updatedAt).toLocaleString()}
@@ -110,9 +110,25 @@ const SingleUserPage = async () => {
             </div>
           </div>
 
+
+          <div className="flex items-center justify-center mt-4 bg-white flex-col p-5 rounded-lg">
+          <h1 className="text-xl font-semibold mb-2">Scan QR Code</h1>
+            
+          {user.role === "student" && user.Student && user.Student.length > 0 && (
+              <Image
+                src={user.Student[0].qrCodeImage || "/default-avatar.png"}
+                alt="QR Code"
+                width={300}
+                height={300}
+                className="mb-4"
+              />
+            )}
+          </div>
           {/* BOTTOM CHART SECTION */}
-          <div className="mt-4 bg-white rounded-md p-4 h-[500px]">
-            <h1 className="text-xl font-semibold mb-2">Users Activity</h1>
+
+          <div className="mt-4 bg-white rounded-md p-4  min-h-[500px] shadow-md">
+            <h1 className="text-xl font-semibold mb-2">User  Activity</h1>
+            
             {user.role === "student" && <AttendanceChart />}
           </div>
         </div>

@@ -158,6 +158,7 @@ model Student {
   email                     String                      @unique
   photos                    Photo[]
   qrCode                    String?
+  qrCodeImage               String?
   isBlackListed             Boolean?
   scholarishipStatus        String?
   healthStatus              String?

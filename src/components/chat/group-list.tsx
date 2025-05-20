@@ -13,10 +13,25 @@ export default function GroupList({ groups, onSelect }: { groups: any[]; onSelec
             onClick={() => onSelect(group)}
           >
             <div className="flex items-center gap-3">
-              <Image src={'/avatar.png'} height={20} width={20} alt="Group Avatar" className="w-10 h-10 rounded-full object-cover" />
+              <Image
+                src="/avatar.png"
+                height={20}
+                width={20}
+                alt="Group Avatar"
+                className="w-10 h-10 rounded-full object-cover"
+              />
               <div>
                 <p className="font-medium">{group.name}</p>
-                <p className="text-sm text-gray-500">{group.onlineCount} members online</p>
+                <p className="text-sm text-gray-500 flex items-center gap-2">
+                  <span className="inline-flex items-center">
+                    <span
+                      className={`w-2 h-2 rounded-full mr-1 ${
+                        group.id === 1 ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    />
+                    {group.id === 1 ? "online" : "offline"}
+                  </span>
+                </p>
               </div>
             </div>
             <Users className="text-gray-500" size={20} />

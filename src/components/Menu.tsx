@@ -60,9 +60,9 @@ const menuItems = [
         visible: ["admin","ticketHolder", "studentService"],
       },
       {
-        label: "Dorm",
+        label: "Dorms",
         icon: Building,
-        href: "/list/dorm",
+        href: "/list/dorms",
         visible: ["admin","ticketHolder", "studentService"],
       },
     ],

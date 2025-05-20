@@ -26,7 +26,7 @@ const Attendaces = async () => {
               href="/list/attendances/attendance-tracker"
               className="text-sm flex-end text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md transition duration-200"
             >
-              View All Records
+              Lounch Attendance Tracker
             </Link>
           )}
         </div>

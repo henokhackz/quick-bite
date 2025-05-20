@@ -22,6 +22,13 @@ export const getUserById = async (id: string) => {
       where: {
         id,
       },
+      include:{
+        Student:{
+          select:{
+            qrCodeImage:true
+          }
+      }
+    }
     });
     if (!user) {
       return { success: false, data: null };

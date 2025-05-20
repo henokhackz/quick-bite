@@ -20,7 +20,7 @@ type Inputs = z.infer<typeof feedbackSchema>;
 
 // Role values with UI-friendly labels
 const ROLES: { label: string; value: Inputs['roles'][number] }[] = [
-  { label: 'Admin', value: 'Admin' },
+  { label: 'Admin', value: 'admin' },
   { label: 'Cafe Staff', value: 'ticketHolder' },
   { label: 'Dorm Staff', value: 'dormManager' },
   { label: 'Student Service', value: 'studentService' },
@@ -45,7 +45,6 @@ export default function FeedbackForm({ setOpen }: { setOpen: (open: boolean) => 
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(feedbackSchema),

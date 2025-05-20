@@ -13,7 +13,7 @@ const Admin = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 col-auto">
         <div className="w-full col-span-2 flex flex-col gap-4 p-2  ">
           <div className="flex flex-col gap-4 lg:flex-row w-full mx-auto flex-wrap">
-            {["student", "admin", "student service", "ticket holder"].map(
+            {["student", "admin", "studentService", "ticketHolder"].map(
               (type) => (
                 <UserCard key={type} type={type} />
               )

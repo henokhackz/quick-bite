@@ -15,7 +15,7 @@ interface DetectedStudent {
   photo1: string;
   studentId: string;
   id: string;
-  photos: { photoUrl: string; photoId: string, studentId: string }[]
+  photos: { photoUrl: string; photoId: string; studentId: string }[];
 }
 
 interface CheckedInStudent {
@@ -33,23 +33,17 @@ interface LatestTenAttendance {
 }
 
 const CafteriaAccessTrackerTable = ({
-  detectedStudent,setError
+  detectedStudent,
+  setError,
 }: {
-  detectedStudent: DetectedStudent, setError:(message: string) => void
+  detectedStudent: DetectedStudent;
+  setError: (message: string) => void;
 }) => {
-  const [checkedInStudent, setCheckedInStudent] =
-    useState<CheckedInStudent | null>(null);
-  const [lastetTenAttendance, setLastetTenAttendance] =
-    useState<LatestTenAttendance | null>(null);
-  const [checkInResult, setCheckInResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
+  const [checkedInStudent, setCheckedInStudent] = useState<CheckedInStudent | null>(null);
+  const [latestTenAttendance, setLatestTenAttendance] = useState<LatestTenAttendance | null>(null);
+  const [checkInResult, setCheckInResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isCheckInLoading, setIsCheckInLoading] = useState(false);
-
   const [isAttendanceLoading, setIsAttendanceLoading] = useState(false);
-
-  console.log(isAttendanceLoading, isCheckInLoading, 'detected student')
 
   const checkInStudent = useCallback(async () => {
     if (!detectedStudent) return;
@@ -57,10 +51,10 @@ const CafteriaAccessTrackerTable = ({
     try {
       setCheckInResult(null);
       setIsCheckInLoading(true);
-
-      const result = await createAttendance(detectedStudent as DetectedStudent);
+      const studentId = detectedStudent.photos[0].studentId;
+      const result = await createAttendance(studentId);
       setCheckInResult(result);
-      setError(result.message)
+      setError(result.message);
 
       if (result.success && result.data) {
         setCheckedInStudent(result.data);
@@ -71,12 +65,13 @@ const CafteriaAccessTrackerTable = ({
     } finally {
       setIsCheckInLoading(false);
     }
-  }, [detectedStudent]);
-  const debounce = useDebounceCallback(checkInStudent, 500);
+  }, [detectedStudent, setError]);
+
+  const debounceCheckIn = useDebounceCallback(checkInStudent, 500);
 
   useEffect(() => {
-    debounce();
-  }, [detectedStudent, checkInStudent, checkInResult]);
+    debounceCheckIn();
+  }, [detectedStudent, debounceCheckIn]);
 
   useEffect(() => {
     const fetchLatestTenAttendance = async () => {
@@ -84,7 +79,7 @@ const CafteriaAccessTrackerTable = ({
         setIsAttendanceLoading(true);
         const result = await getLatestTenAttendance();
         if (result) {
-          setLastetTenAttendance(result);
+          setLatestTenAttendance(result);
         }
       } catch (error) {
         console.error("Error fetching latest ten attendance:", error);
@@ -95,7 +90,6 @@ const CafteriaAccessTrackerTable = ({
     fetchLatestTenAttendance();
   }, []);
 
-
   // Loader for latest attendance
   const AttendanceLoader = () => (
     <div className="flex justify-center items-center mt-4 w-full">
@@ -104,26 +98,24 @@ const CafteriaAccessTrackerTable = ({
   );
 
   return (
-    <div className="overflow-x-auto rounded-lg mt-4 flex items-center justify-center flex-col">
+    <div className="overflow-x-auto rounded-lg mt-4 flex flex-col items-center">
       {/* Check-in result or error */}
       {checkInResult && (
-        <>
-          <div
-            className={`w-full overflow-hidden rounded-lg mt-4 mb-4 ${
-              checkInResult.success ? "text-green-400" : "text-red-400"
-            }`}
-          >
-            
-            <audio
-              src={checkInResult.success ? "/success.mp3" : "/error.mp3 "}
-              autoPlay
-            />
-          </div>
-        </>
+        <div
+          className={`w-full overflow-hidden rounded-lg mt-4 mb-4 ${
+            checkInResult.success ? "text-green-400" : "text-red-400"
+          }`}
+        >
+          <audio
+            src={checkInResult.success ? "/success.mp3" : "/error.mp3"}
+            autoPlay
+          />
+          <p className="text-center">{checkInResult.message}</p>
+        </div>
       )}
 
       {/* Table */}
-      <table className="w-full rounded-md bg-cardBackground text-cardForeground  shodow-md">
+      <table className="w-full rounded-md bg-cardBackground text-cardForeground shadow-md">
         <thead className="bg-primary-500 text-cardForeground">
           <tr>
             <th className="px-6 py-3 text-left font-semibold">Student</th>
@@ -134,8 +126,6 @@ const CafteriaAccessTrackerTable = ({
         </thead>
         <tbody className="text-sm">
           {/* Check-in loader */}
-
-          {/* Latest attendance loader */}
           {isAttendanceLoading && (
             <tr>
               <td colSpan={4} className="text-center py-4">
@@ -170,7 +160,7 @@ const CafteriaAccessTrackerTable = ({
           )}
 
           {/* Latest 10 Attendance */}
-          {lastetTenAttendance?.data?.map((student, index) => (
+          {latestTenAttendance?.data?.map((student, index) => (
             <tr
               key={index}
               className="odd:bg-primary/10 even:bg-primaryLight/10 hover:bg-primary/20 transition duration-300"

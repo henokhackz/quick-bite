@@ -5,6 +5,7 @@ import { feedbackSchema } from '../schema/schema';
 import { auth } from '../auth';
 import prisma from '../prisma';
 import cloudinary from '../cloudinary';
+import { revalidatePath } from 'next/cache';
 
 export async function submitFeedback(data: z.infer<typeof feedbackSchema>) {
   const { user }: any = await auth();
@@ -33,7 +34,8 @@ export async function submitFeedback(data: z.infer<typeof feedbackSchema>) {
         status: 'PENDING', 
       },
     });
-
+    
+    revalidatePath('/list/feedbacks');
     return {success:true, feedback};
   } catch (error) {
     console.error("Error submitting feedback:", error);

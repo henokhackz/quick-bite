@@ -4,17 +4,11 @@ import { revalidatePath } from "next/cache";
 import prisma from "../prisma";
 import { LastTimeCheckIn } from "../utils";
 
-interface DetectedStudent {
-  id: string;
-  firstName: string;
-  lastName: string;
-  photos: { photoUrl: string; photoId: string }[];
-  studentId: string;
-}
 
-export const createAttendance = async (detectedStudent: DetectedStudent) => {
 
-  if (!detectedStudent || !detectedStudent.id ) {
+export const createAttendance = async (studentId:string) => {
+  
+  if (!studentId) {
     return {
       success: false,
       message: "Invalid student data. Please provide all required fields.",
@@ -22,7 +16,29 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
   }
 
   try {
-    const { firstName, lastName, photos } = detectedStudent;
+    const student = await prisma.student.findUnique({
+      where: { id: studentId }, 
+      select: {
+        firstName: true,
+        lastName: true,
+        photos: {
+          select: {
+            photoUrl: true,
+            photoId: true,
+            studentId: true,
+          },
+        },
+      },
+    })
+  
+    if (!student) {
+      return {
+        success: false,
+        message: "Student not found.",
+      };
+    }
+
+    const { firstName, lastName, photos } = student;
 
     const photo1 = photos?.[0]?.photoUrl || "";
     if (!photo1) {
@@ -37,7 +53,7 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
 
     // Check if the student has already checked in recently
     const existingAttendance = await prisma.attendance.findFirst({
-      where: { studentId:detectedStudent.id},
+      where: { studentId: studentId },
       orderBy: { timestamp: "desc" },
       select: { timestamp: true },
     });
@@ -57,12 +73,12 @@ export const createAttendance = async (detectedStudent: DetectedStudent) => {
   
     const result = await prisma.attendance.create({
       data: {
-        studentId:detectedStudent.id,
+        studentId: studentId,
         studentName: `${firstName} ${lastName}`,
         studentPicture: photo1,
         cafeteria,
         mealType,
-        checkInMethod: "fr", // Face recognition
+        checkInMethod: "fr",
         attended: true,
         mealCost: "35", 
       },

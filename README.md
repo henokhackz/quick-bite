@@ -30,8 +30,35 @@ An all-in-one platform built to streamline the management of university dormitor
 | **Others**   | Excel.js for file parsing, QR code packages |
 
 ## 📸 Screenshots
+![Dashboard Screenshot](https://github.com/henokhackz/quick-bite/blob/ac263ad8c04b2364d65a62f52fd85fafb8eb796e/Screenshot%20from%202025-06-30%2011-09-08.png?raw=true)
+![QR Code Attendance](https://github.com/henokhackz/quick-bite/blob/ac263ad8c04b2364d65a62f52fd85fafb8eb796e/Screenshot%20from%202025-06-30%2011-09-51.png?raw=true)
 
-> _Add your project screenshots here (dashboard, QR scan, dorm list, etc.)_
 
-## 📂 Folder Structure
+
+## 🧪 Running Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/your-username/quick-bite.git
+
+# Navigate to the project folder
+cd quick-bite
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Add your DB URL and other environment configs
+
+# Run Prisma migrations
+npx prisma migrate dev
+
+# Start the development server
+npm run dev
+
+
+DATABASE_URL=postgresql://...
+NEXTAUTH_SECRET=...
+NEXTAUTH_URL=http://localhost:3000
 

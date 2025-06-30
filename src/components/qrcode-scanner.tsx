@@ -1,5 +1,4 @@
-// pages/scan.tsx
-
+//@ts-nocheck
 import React, { useCallback, useState } from "react";
 import QrScanner from "react-qr-scanner";
 import { TakeAttendanceByQRCode } from "@/lib/actions/attendance.action";

@@ -69,6 +69,7 @@ const FormModal = ({
   table:
     | "student"
     | "ticketHolder"
+    | "dorm"
     | "studentService"
     | "announcement"
     | "feedback"

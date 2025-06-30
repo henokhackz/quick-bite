@@ -8,7 +8,6 @@ import { loadModels } from "@/hooks/useLoadModels";
 import { getStudentImages} from "@/lib/actions/admin.action";
 import QRScannerComponent from "@/components/qrcode-scanner";
 import Link from "next/link";
-import { MoveLeft } from "lucide-react";
 
 const videoConstraints = {
   width: 640,
@@ -167,6 +166,7 @@ const CafteriaAccessTracker = () => {
 
   return (
     <div className="flex flex-col gap-6 p-4 items-center justify-start min-h-screen bg-gray-100">
+      <p className="text-2xl font-bold text-gray-800 mb-4">{error && error}</p>
       <div className="flex gap-4 items-center justify-between px-12  w-full">
         <button
           onClick={() => setMode("face")}

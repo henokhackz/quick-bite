@@ -1,4 +1,4 @@
-import { getUsers } from '@/lib/actions/chat.action';
+
 "use server";
 
 import prisma from "../prisma";

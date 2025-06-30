@@ -97,6 +97,14 @@ const CafteriaAccessTrackerTable = ({
     </div>
   );
 
+  if(isCheckInLoading || isAttendanceLoading) {
+    return (
+      <div className="flex justify-center items-center mt-4 w-full">
+        <div className="w-6 h-6 border-4 border-t-4 border-green-500 border-solid rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+  
   return (
     <div className="overflow-x-auto rounded-lg mt-4 flex flex-col items-center">
       {/* Check-in result or error */}

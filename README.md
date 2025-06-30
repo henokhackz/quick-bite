@@ -39,7 +39,7 @@ An all-in-one platform built to streamline the management of university dormitor
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/quick-bite.git
+git clone https://github.com/henokhackz/quick-bite.git
 
 # Navigate to the project folder
 cd quick-bite

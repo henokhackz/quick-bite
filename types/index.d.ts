@@ -181,3 +181,24 @@ declare module "next-auth" {
     role: string;
   }
 }
+
+
+export type Group = {
+  id: string;
+  name: string;
+  isPrivate: boolean;
+  adminId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  members?: GroupMember[];
+};
+
+export type GroupMember = {
+  id: string;
+  userId: string;
+  groupId: string;
+  joinedAt: Date;
+  role: "member" | "admin";
+  user?: User;
+};
+

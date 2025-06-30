@@ -1,6 +1,19 @@
 import { auth } from "@/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Home,
+  CheckSquare,
+  MessageSquare,
+  Ticket,
+  Users,
+  UserCircle,
+  Settings,
+  LogOut,
+  Megaphone,
+  MessageCircleMoreIcon,
+  Building
+} from "lucide-react";
 
 const menuItems = [
   {
@@ -8,83 +21,49 @@ const menuItems = [
     items: [
       {
         label: "Dashboard",
-        icon: () => (
-          <img src="/home.png" alt="Home Icon" className="w-5 h-5 mr-2" />
-        ),
+        icon: Home,
         href: "/",
         visible: ["admin", "student", "ticketHolder", "studentService"],
       },
       {
         label: "Attendance",
-        icon: () => (
-          <img
-            src="/attendance.png"
-            alt="Attendance Icon"
-            className="w-5 h-5 mr-2"
-          />
-        ),
+        icon: CheckSquare,
         href: "/list/attendances",
         visible: ["admin", "student"],
       },
       {
-        label: "Meal Costs",
-        icon: () => (
-          <img
-            src="/finance.png"
-            alt="Meal Costs Icon"
-            className="w-5 h-5 mr-2"
-          />
-        ),
-        href: "/list/meal-costs",
-        visible: ["admin", "student"],
-      },
-      {
-        label: "Feedback",
-        icon: () => (
-          <img
-            src="/message.png"
-            alt="Feedback Icon"
-            className="w-5 h-5 mr-2"
-          />
-        ),
+        label: "Feedbacks",
+        icon: MessageSquare,
         href: "/list/feedbacks",
-        visible: ["admin", "students", "studentService"],
+        visible: ["admin", "student", "studentService"],
       },
       {
         label: "Ticket Holders",
-        icon: () => (
-          <img
-            src="/ticket-holders.png"
-            alt="Feedback Icon"
-            className="w-5 h-5 mr-2"
-          />
-        ),
+        icon: Ticket,
         href: "/list/ticket-holders",
-        visible: ["admin"],
-      },
-      {
-        label: "Student Service",
-        icon: () => (
-          <img
-            src="/student-service.png"
-            alt="Feedback Icon"
-            className="w-5 h-5 mr-2"
-          />
-        ),
-        href: "/list/student-services",
-        visible: ["admin"],
+        visible: ["admin"]
       },
       {
         label: "Students",
-        icon: () => (
-          <img
-            src="/student.png"
-            alt="Student Management Icon"
-            className="w-5 h-5 mr-2"
-          />
-        ),
+        icon: Users,
         href: "/list/students",
-        visible: ["admin"],
+        visible: ["admin", 'ticketHolder'],
+      },{
+        label: "Announcements",
+        icon:Megaphone,
+        href: "/list/announcements",
+        visible: ["admin", "ticketHolder", "studentService"],
+      },{
+        label: "Chats",
+        icon: MessageCircleMoreIcon,
+        href: "/list/chats",
+        visible: ["admin","ticketHolder", "studentService"],
+      },
+      {
+        label: "Dorms",
+        icon: Building,
+        href: "/list/dorms",
+        visible: ["admin","ticketHolder", "studentService"],
       },
     ],
   },
@@ -93,29 +72,19 @@ const menuItems = [
     items: [
       {
         label: "Profile",
-        icon: () => (
-          <img src="/profile.png" alt="Profile Icon" className="w-5 h-5 mr-2" />
-        ),
+        icon: UserCircle,
         href: "/profile",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         label: "Settings",
-        icon: () => (
-          <img
-            src="/setting.png"
-            alt="Settings Icon"
-            className="w-5 h-5 mr-2"
-          />
-        ),
+        icon: Settings,
         href: "/settings",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         label: "Logout",
-        icon: () => (
-          <img src="/logout.png" alt="Logout Icon" className="w-5 h-5 mr-2" />
-        ),
+        icon: LogOut,
         href: "/logout",
         visible: ["admin", "teacher", "student", "parent"],
       },
@@ -125,32 +94,24 @@ const menuItems = [
 
 export default async function Menu() {
   const session = await auth();
-// @ts-expect-error type error will check it later(user object)
-  if (!session && !session?.user) {
-    return null;
-  }
+  if (!session?.user) return null;
 
-  const role = session?.user.role;
+  const {user:{role, image, name, email,}} = session 
 
   return (
-    <div className="w-full bg-white min-h-screen p-2 shodow-md gap-4 flex flex-col items-center h-full  max-h-screen overflow-y-scroll top-0 left-0 sticky">
+    <div className="w-full bg-white backdrop-blur-2xl min-h-screen p-2 shadow-md flex flex-col items-center h-full max-h-screen overflow-y-scroll sticky top-0 left-0">
       {/* Logo */}
-      <Image
-        src="/logo.jpeg"
-        alt="Logo"
-        className="w-15 h-15 mb-4"
-        height={40}
-        width={40}
-      />
+      <div className="w-full flex items-center justify-center flex-col mb-4  rounded-lg bg-gray-100 py-2 md:py-4 px-2">
+      <Image src={image || '/avatar.png'} alt="Logo" height={40} width={40} className="mb-4 object-cover rounded-full" />
+        <h1 className="text-lg font-semibold text-dashboardForeground/80 hidden md:block">{name}</h1>
+        <p className="text-sm text-dashboardForeground/80 hidden md:block">{email}</p>
+      </div>
+
 
       {menuItems.map((category, categoryIndex) => (
-        <div key={categoryIndex} className="mb-4 w-full space-y-4">
-          {/* Category Title */}
-          <h2 className="text-xs font-semibold text-gray-500 mb-4 mt-4">
-            {category.title}
-          </h2>
-
-          {/* Items in Category */}
+        <div key={categoryIndex} className="mb-4 w-full space-y-2">
+          <h2 className="text-xs font-semibold text-primary/80 mb-2">{category.title}</h2>
+          <div className="h-[1px] bg-gray-200 rounded-lg"></div>
           {role &&
             category.items.map(
               (item, itemIndex) =>
@@ -158,13 +119,10 @@ export default async function Menu() {
                   <Link
                     key={itemIndex}
                     href={item.href}
-                    className="flex items-center py-2 px-4 rounded-md hover:bg-gray-200"
+                    className="flex items-center py-2 px-4 rounded-md hover:bg-gray-200 transition"
                   >
-                    {/* Icon */}
-                    {item.icon()}
-
-                    {/* Label */}
-                    <span className="hidden md:block  text-dashboardForeground text-sm">
+                    <item.icon className="w-5 h-5 mr-2 text-dashboardForeground/80 shrink-0 " />
+                    <span className="hidden md:block text-dashboardForeground/80 text-sm">
                       {item.label}
                     </span>
                   </Link>

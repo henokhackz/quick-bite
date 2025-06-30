@@ -35,6 +35,8 @@ model User {
   hashedPassword String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  status         String    @default("offline")
+  lastSeen       DateTime? @default(now())
 
   // Relations
   sessions       Session[]
@@ -45,6 +47,12 @@ model User {
   ticketHolder   TicketHolder[]
   studentService StudentService[]
   Student        Student[]
+  sentMessages   Message[]
+  chatRooms      ChatRoomUser[]
+  notifications  Notification[]
+
+  ChatRoom ChatRoom[]
+  Feedback Feedback[]
 }
 
 model Account {
@@ -113,9 +121,9 @@ model Photo {
   photoId   String @unique
   studentId String
 
-  student        Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   ticketHolderId String?
 }
 
@@ -129,15 +137,16 @@ model TicketHolderPhoto {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
+
 model StudentServicePhoto {
-  id             String @id @default(cuid()) @map("_id")
-  photoUrl       String
-  photoId        String @unique
+  id               String @id @default(cuid()) @map("_id")
+  photoUrl         String
+  photoId          String @unique
   studentServiceId String
 
   studentService StudentService @relation(fields: [studentServiceId], references: [id], onDelete: Cascade)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Student {
@@ -149,6 +158,7 @@ model Student {
   email                     String                      @unique
   photos                    Photo[]
   qrCode                    String?
+  qrCodeImage               String?
   isBlackListed             Boolean?
   scholarishipStatus        String?
   healthStatus              String?
@@ -158,7 +168,7 @@ model Student {
   attendance                Attendance[]
   studentServicesMembership StudentServicesMembership[]
   phoneNumber               String?
-  role                      Role  @default(student)
+  role                      Role                        @default(student)
   dateOfBirth               DateTime
   gender                    Gender
   address                   String?
@@ -185,26 +195,25 @@ model TicketHolder {
   updatedAt         DateTime            @updatedAt
   ticketHolderPhoto TicketHolderPhoto[]
 }
+
 model StudentService {
-  id                String              @id @default(cuid()) @map("_id")
-  userId            String?             @db.ObjectId
-  username          String              @unique
-  firstName         String
-  lastName          String
-  email             String              @unique
-  assignedCafeteria String
-  phoneNumber       String?
-  role              Role
-  dateOfBirth       DateTime?
-  gender            Gender
-  address           String?
-  user              User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  id                  String                @id @default(cuid()) @map("_id")
+  userId              String?               @db.ObjectId
+  username            String                @unique
+  firstName           String
+  lastName            String
+  email               String                @unique
+  assignedCafeteria   String
+  phoneNumber         String?
+  role                Role
+  dateOfBirth         DateTime?
+  gender              Gender
+  address             String?
+  user                User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
   studentServicePhoto StudentServicePhoto[]
 }
-
-
 
 model Attendance {
   id             String   @id @default(cuid()) @map("_id")
@@ -224,6 +233,80 @@ model Attendance {
   userId         String?  @db.ObjectId
 }
 
+model ChatRoom {
+  id          String         @id @default(cuid()) @map("_id")
+  name        String?        @unique // Only for group chats
+  description String? // Only for group chats
+  type        ChatType       @default(PERSONAL)
+  isPrivate   Boolean        @default(false)
+  ownerId     String?        @db.ObjectId
+  owner       User?          @relation(fields: [ownerId], references: [id])
+  messages    Message[]
+  users       ChatRoomUser[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ChatRoomUser {
+  id         String   @id @default(cuid()) @map("_id")
+  chatRoomId String
+  role       UserRole
+
+  userId   String?  @db.ObjectId
+  user     User?    @relation(fields: [userId], references: [id])
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id         String   @id @default(cuid()) @map("_id")
+  text       String
+  senderId   String?  @db.ObjectId
+  chatRoomId String
+  sender     User?    @relation(fields: [senderId], references: [id])
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  seenIds    String[] @db.ObjectId
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid()) @map("_id")
+  userId    String   @db.ObjectId
+  type      String
+  isRead    Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Feedback {
+  id     String @id @default(cuid()) @map("_id")
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  title   String
+  message String
+
+  roles    String[]
+  photoUrl String?
+
+  status FeedbackStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum FeedbackStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
+
 enum Method {
   fr
   qrCode
@@ -239,4 +322,15 @@ enum Role {
   studentService
   ticketHolder
   admin
+  dormManager
+}
+
+enum ChatType {
+  PERSONAL
+  GROUP
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
 }

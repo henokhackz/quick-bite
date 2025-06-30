@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import QRCode from "qrcode";
 
 import cloudinary from "../cloudinary";
 
@@ -51,6 +52,8 @@ export async function createStudent({ data }: { data: Partial<StudentForm> }) {
     batch,
   } = validData.data;
 
+  
+
   try {
     const existingStudent = await prisma.user.findUnique({
       where: { username },
@@ -94,6 +97,8 @@ export async function createStudent({ data }: { data: Partial<StudentForm> }) {
     }
 
     const isoDate = toISO8601DateTime(dateOfBirth as string);
+    const qrCodeData = username || crypto.randomUUID();
+  const qrImageUrl = await QRCode.toDataURL(qrCodeData);
 
     const newStudent = await prisma.user.create({
       data: {
@@ -117,6 +122,8 @@ export async function createStudent({ data }: { data: Partial<StudentForm> }) {
             assignedCafeteria,
             department,
             email,
+            qrCode:qrCodeData,
+            qrCodeImage: qrImageUrl,
             scholarishipStatus: scholarishipStatus ?? "no scholarship",
             photos: {
               create: [

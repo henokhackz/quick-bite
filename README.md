@@ -1,26 +1,37 @@
-#  Cafe Management Dashboard
+# ☕🏠 Smart Café & Dorm Management System
 
-## Getting Started
+An all-in-one platform built to streamline the management of university dormitories and cafeterias. Designed for Arba Minch University, this system empowers administrators, staff, and students by automating daily operations including meal tracking, dorm assignments, QR-based attendance, real-time communication, and more.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### ✅ Student Features
+- Update personal profile and upload ID photos
+- View dorm and cafeteria assignments
+- Scan QR code for café check-in
+- Receive announcements and notifications
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### ✅ Admin & Staff Features
+- **Dorm Management**: Assign students, manage dorm availability and equipment
+- **Café Management**: Track meals, view attendance reports
+- **Excel Import**: Seed student data via Excel file upload with automatic ID generation
+- **Real-time Chat**: Group and personal messaging for admin/staff
+- **Announcement System**: Send updates to all users
+- **Real-time Notifications**: Delivered instantly for announcements, alerts, and system events
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💻 Tech Stack
 
-## Learn More
+| Tech       | Description                              |
+|------------|------------------------------------------|
+| **Frontend** | Next.js, TypeScript, Tailwind CSS         |
+| **Backend**  | Next.js API Routes (Edge Functions)      |
+| **Database** | Prisma ORM with PostgreSQL               |
+| **Auth**     | NextAuth.js               |
+| **Real-time**| WebSocket / Prisma-based real-time chat  |
+| **Others**   | Excel.js for file parsing, QR code packages |
 
-To learn more about Next.js, take a look at the following resources:
+## 📸 Screenshots
 
-- [Lama Dev Youtube Channel](https://youtube.com/lamadev) 
-- [Next.js](https://nextjs.org/learn)
+> _Add your project screenshots here (dashboard, QR scan, dorm list, etc.)_
+
+## 📂 Folder Structure
+

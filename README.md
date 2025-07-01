@@ -34,6 +34,9 @@ An all-in-one platform built to streamline the management of university dormitor
 ![QR Code Attendance](https://github.com/henokhackz/quick-bite/blob/ac263ad8c04b2364d65a62f52fd85fafb8eb796e/Screenshot%20from%202025-06-30%2011-09-51.png?raw=true)
 
 
+role:admin
+username:admin2
+password:password123
 
 ## 🧪 Running Locally
 
